@@ -1,0 +1,12 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="Mouse APP:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/Mouse_APP_jar</output-path>
+    <root id="archive" name="Mouse APP.jar">
+      <element id="directory" name="META-INF">
+        <element id="file-copy" path="$PROJECT_DIR$/src/main/META-INF/MANIFEST.MF" />
+      </element>
+      <element id="module-output" name="Mouse APP" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/../PanamaHitek_Arduino-2.8.2.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>
