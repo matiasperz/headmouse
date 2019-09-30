@@ -11,7 +11,15 @@
 
 MPU6050 mpu;
 
-int16_t ax, ay, az, gx, gy, gz;
+
+//CONFIGURATION
+const boolean LOG_VALUES = false; //<--- For logging reading values
+const boolean OPEN_KEYBOARD = false; //<--- Config for oppening the on screan keyboard when connection
+//END COFIGURATION
+
+
+//EXECUTION VARIABLE DEFINITION
+int16_t ax, ay, az, gx, gy, gz; //Variables para enviar 
 int vx, vy, vx_prec, vy_prec;
 int count = 0;
 int cont = 0;
@@ -21,6 +29,8 @@ int sens = 200;
 char serialReadedValues;
 char valores2[4];
 
+
+//SETTING UP
 void setup() {
   Serial.begin(9600);
 
@@ -38,6 +48,7 @@ void setup() {
 }
 
 
+//EXECUTION
 void loop() {
   //Si ser reciben valores, entonces se almacenan en la variable valores, la cual posteriormente se utiliza para guardar 
   //los datos en un array de caracteres (siempre  y cuando correspondan a los datos pedidos)
