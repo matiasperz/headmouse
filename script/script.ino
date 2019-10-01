@@ -15,6 +15,7 @@ MPU6050 mpu;
 //CONFIGURATION
 const boolean LOG_VALUES = false; //<--- For logging reading values
 const boolean OPEN_KEYBOARD = false; //<--- Config for oppening the on screan keyboard when connection
+const boolean TOGGLE_LEFT_CLICK = false; //<--- For canceling the LEFT_CLICK action;
 //END COFIGURATION
 
 
@@ -33,10 +34,12 @@ char valores2[4];
 //SETTING UP
 void setup() {
   Serial.begin(9600);
-
+  
+  
   if(!Serial){
     Keyboard.begin();
     delay(2000);
+    printConfig();
     openScreenKeyboard(); //This triggers the onScrean Keyboard
   }
 
@@ -52,45 +55,13 @@ void setup() {
 void loop() {
   //Si ser reciben valores, entonces se almacenan en la variable valores, la cual posteriormente se utiliza para guardar 
   //los datos en un array de caracteres (siempre  y cuando correspondan a los datos pedidos)
-  if(Serial.available() > 0){
-    serialReadedValues =  Serial.read();
-
-    if(serialReadedValues == '0' || serialReadedValues == '1' || serialReadedValues == '2' || serialReadedValues == '3' || serialReadedValues == '-'){
-      valores2[cont] = serialReadedValues;
-      cont++;
-    }
-
-    if(cont > 2){
-      cont = 0;
-    }
-  }
-
-  //Se utiliza el array decaracteres para dividirlo en dos tareas: valores2[0] siempre corresponderá a
-  //la cantidad de clicks por segundo, por lo que se utiliza para esa función
-  if(valores2[0] == '0' || valores2[0] == '1' || valores2[0] == '2' || valores2[0] == '3'){
-    valor_click = valores2[0];
-  }
-
-  //Mientras que valores[2] siempre corresponderá a la sensibilidad que se debe utilizar
-  switch(valores2[2]){
-    case '1':
-    sens = 300;
-    break;
-    case '2':
-    sens = 500; 
-    break;
-    case '3':
-    sens = 700;
-    break;
-  }
-
+ 
   mpu.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
 
   //Estos valores van a luego ser asignados a la posicion del mouse y estan siendo
   //Divididos por la sensibilidad para reducir el movimiento
   vx = (gx + 200) / sens;
   vy = -(gz + 60) / sens;
-  Serial.println(sens);
 
   Mouse.move(vx, vy);
 
@@ -117,25 +88,33 @@ void loop() {
   delay(20);
 }
 
-void openScreenKeyboard(){
-  Keyboard.press(KEY_LEFT_GUI);
-  Keyboard.press('r');
-  Keyboard.releaseAll();
-  delay(200);
-  Keyboard.print("OSK");
-  delay(100);
 
-  Keyboard.press(KEY_RETURN);
-  Keyboard.releaseAll();
+void printConfig(){
+  Serial.println("CONFIGURATION");
+  Serial.println("LOG_VALUES: " + LOG_VALUES);
+  Serial.println("OPEN_KEYBOARD: " + OPEN_KEYBOARD);
+}
+
+void openScreenKeyboard(){
+  if(OPEN_KEYBOARD){
+    Keyboard.press(KEY_LEFT_GUI);
+    Keyboard.press('r');
+    Keyboard.releaseAll();
+    delay(200);
+    Keyboard.print("OSK");
+    delay(100);
+    Keyboard.press(KEY_RETURN);
+    Keyboard.releaseAll();
+  }
 }
 
 void mouseLeftClick(){
-  if (!Mouse.isPressed(MOUSE_LEFT)) {
-    Mouse.press(MOUSE_LEFT);
-    Keyboard.press(KEY_LEFT_CTRL);
-    delay(500);
-    Keyboard.releaseAll();
-    Serial.print(valor_click);
-    count = 0;
+  if(TOGGLE_LEFT_CLICK){
+    if(!Mouse.isPressed(MOUSE_LEFT)) {
+      Mouse.press(MOUSE_LEFT);
+      delay(500);
+      Keyboard.releaseAll();
+      count = 0;
+    } 
   }
 }
