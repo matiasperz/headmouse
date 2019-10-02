@@ -9,9 +9,9 @@
 
 //CONFIGURATION
 const boolean LOG_VALUES = false; //<--- For logging reading values
-const boolean OPEN_KEYBOARD = true; //<--- Config for oppening the on screan keyboard when connection
+const boolean OPEN_KEYBOARD = false; //<--- Config for oppening the on screan keyboard when connection
 const boolean TOGGLE_LEFT_CLICK = true; //<--- For canceling the LEFT_CLICK action;
-const boolean TOGGLE_RIGHT_CLICK = false; //<--- For canceling the RIGHT_CLICK action;
+const boolean TOGGLE_RIGHT_CLICK = true; //<--- For canceling the RIGHT_CLICK action;
 //END COFIGURATION
 
 //VARIABLES
@@ -52,7 +52,7 @@ void setup() {
   radio.setPALevel(RF24_PA_MIN);
   radio.startListening();
   Serial.println("Radio started listening");
-
+  
   //KEYBOARD
   Keyboard.begin();
   delay(1000);
@@ -79,10 +79,7 @@ void loop() {
     Serial.print(":");
     Serial.println(RadioPackage.action);
     
-    if(!strcmp(RadioPackage.action, "LEFT_CLICK")){
-      Serial.print("dsafasdfsdfsdafsadfsdafdsafds");
-      mouseLeftClick();
-    }
+    evaluateMouseClick();
   }
 
   mpu.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
@@ -104,9 +101,9 @@ void loop() {
     }else if(valor_click == '3' && count == 75){
       //mouseLeftClick();
     }else {
-      if(Mouse.isPressed(MOUSE_LEFT)) {
-        Mouse.release(MOUSE_LEFT);
-      }
+      //if(Mouse.isPressed(MOUSE_LEFT)) {
+        //Mouse.release(MOUSE_LEFT);
+      //}
     }
   }else {
     vx_prec = vx;
@@ -137,13 +134,41 @@ void openScreenKeyboard(){
   }
 }
 
+void evaluateMouseClick(){
+  if(!strcmp(RadioPackage.action, "LEFT_CLICK")){
+    mouseLeftClick();
+  }else if(!strcmp(RadioPackage.action, "RIGHT_CLICK")){
+    mouseRightClick();
+  }else if(!strcmp(RadioPackage.action, "SELECTION")){
+    selectionClick(); //<--- Send 1 to initializate selection
+  }else{
+  }
+}
+
+
+//Mouse clicks
 void mouseLeftClick(){
-  if(TOGGLE_LEFT_CLICK){
-    if(!Mouse.isPressed(MOUSE_LEFT)) {
-      Mouse.press(MOUSE_LEFT);
-      delay(50);
-      Keyboard.releaseAll();
-      count = 0;
-    } 
+  if(!Mouse.isPressed(MOUSE_LEFT)) {
+    Mouse.click(MOUSE_LEFT);
+  }else{
+    Mouse.release(MOUSE_LEFT);
+  }
+}
+
+void mouseRightClick(){
+  if(!Mouse.isPressed(MOUSE_RIGHT)) {
+    Mouse.click(MOUSE_RIGHT);
+  }else{
+    Mouse.release(MOUSE_RIGHT);
+    Mouse.click(MOUSE_RIGHT);
+  }
+}
+
+void selectionClick(){
+  if(!Mouse.isPressed(MOUSE_LEFT)){
+    Mouse.press(MOUSE_LEFT);
+  }else{
+    Mouse.release(MOUSE_LEFT);
+    Mouse.press(MOUSE_LEFT);
   }
 }

@@ -79,7 +79,7 @@ boolean evaluateClick(){
     strcpy(RadioPackage.action, "RIGHT_CLICK");
   }else if(Readings.RIGHT_CLICK && Readings.LEFT_CLICK){
     //SELECTION
-    strcpy(RadioPackage.action, "INIT_SELECTION");
+    strcpy(RadioPackage.action, "SELECTION");
   }else{
     _newInteraction = false;
   }
