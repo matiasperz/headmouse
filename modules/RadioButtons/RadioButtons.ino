@@ -14,21 +14,18 @@ typedef struct{ //<--- Touch sensors clicks structure
 
 typedef struct{ //<--- Package to be transmited by radio structure
   const char module[5] = "RCB"; //Radio Capacitive Buttons - Acronym
-  char action[15] = ""; //
+  char action[15] = "";
 } radioPackage; //<--- Struct type
 
 readings Readings; //<--- Struct type / Variable name
 radioPackage RadioPackage; //<--- Struct type / Variable name
-
-
-//PIN AND VARIABLE CONFIG
 const int left_sensor_pin = 2; //<--- Left sensor pin config
 const int right_sensor_pin = 3; //<--- Right sensor pin config
-boolean newInteraction;
+boolean newInteraction; //<--- Variable for detenting new touches
+const byte address[6] = "00001"; //<--- Address for the NRF24L01 emitter
 
+//INITIALIZATIONS
 RF24 radio(9,10); //<--- Initialize radio with pins
-
-const byte address[6] = "00001";
 
 
 /*-------------- SETUP --------------*/
