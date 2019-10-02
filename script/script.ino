@@ -1,25 +1,26 @@
-
-
-/* CÃ³digo para controlar el ratÃ³n con la cabeza y click asistido.
-*/
-
-#include <Wire.h>
+//#include <Wire.h>
 #include <I2Cdev.h> //Libreria necesaria para el giroscopio
 #include <MPU6050.h> //Libreria giroscopio
 #include <Keyboard.h> //Libreria de teclado
 #include <Mouse.h> //Libreria de mouse
-
-MPU6050 mpu;
-
+#include <SPI.h>
+#include "nRF24L01.h"
+#include "RF24.h"
 
 //CONFIGURATION
 const boolean LOG_VALUES = false; //<--- For logging reading values
-const boolean OPEN_KEYBOARD = false; //<--- Config for oppening the on screan keyboard when connection
-const boolean TOGGLE_LEFT_CLICK = false; //<--- For canceling the LEFT_CLICK action;
+const boolean OPEN_KEYBOARD = true; //<--- Config for oppening the on screan keyboard when connection
+const boolean TOGGLE_LEFT_CLICK = true; //<--- For canceling the LEFT_CLICK action;
+const boolean TOGGLE_RIGHT_CLICK = false; //<--- For canceling the RIGHT_CLICK action;
 //END COFIGURATION
 
+//VARIABLES
+typedef struct{ //<--- Package to be transmited by radio structure
+  const char module[5] = "";
+  char action[15] = "";
+} radioPackage; //<--- Struct type
 
-//EXECUTION VARIABLE DEFINITION
+radioPackage RadioPackage; //<--- Struct type / Variable name
 int16_t ax, ay, az, gx, gy, gz; //Variables para enviar 
 int vx, vy, vx_prec, vy_prec;
 int count = 0;
@@ -29,33 +30,61 @@ char valor_click= '2';
 int sens = 200;
 char serialReadedValues;
 char valores2[4];
+byte address[6] = "00001"; //<--- Radio NRF24L01 Address
+
+//INITIALIZATIONS
+MPU6050 mpu;
+RF24 radio(9,10);
 
 
-//SETTING UP
+/*-------------- SETUP --------------*/
+
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(9600); //<--- Serial monitor begin
   
+  //NRF24L01 Alimentation 3.3v pin config
+  pinMode(4, OUTPUT); //<--- Define the pin output
+  digitalWrite(4, HIGH); //<--- Flow voltaje through pin
   
-  if(!Serial){
-    Keyboard.begin();
-    delay(2000);
-    printConfig();
-    openScreenKeyboard(); //This triggers the onScrean Keyboard
-  }
+  //RADIO
+  radio.begin();
+  radio.openReadingPipe(0, address);
+  radio.setPALevel(RF24_PA_MIN);
+  radio.startListening();
+  Serial.println("Radio started listening");
 
+  //KEYBOARD
+  Keyboard.begin();
+  delay(1000);
+  openScreenKeyboard(); //This triggers the onScrean Keyboard
+  
+  //MPU
   Wire.begin();
   mpu.initialize();
-  if(!mpu.testConnection()) {
+  if(!mpu.testConnection()) { //<--- Wait till MPU6050 returns a truly connection
     while (1);
   }
+  
+  printConfig(); //<--- Print current configuration
 }
 
 
-//EXECUTION
+/*-------------- LOOP --------------*/
+
 void loop() {
-  //Si ser reciben valores, entonces se almacenan en la variable valores, la cual posteriormente se utiliza para guardar 
-  //los datos en un array de caracteres (siempre  y cuando correspondan a los datos pedidos)
- 
+  if( radio.available()){
+    radio.read(&RadioPackage, sizeof(RadioPackage));
+    //Print readings
+    Serial.print(RadioPackage.module);
+    Serial.print(":");
+    Serial.println(RadioPackage.action);
+    
+    if(!strcmp(RadioPackage.action, "LEFT_CLICK")){
+      Serial.print("dsafasdfsdfsdafsadfsdafdsafds");
+      mouseLeftClick();
+    }
+  }
+
   mpu.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
 
   //Estos valores van a luego ser asignados a la posicion del mouse y estan siendo
@@ -69,11 +98,11 @@ void loop() {
   if( (vx_prec - 5) <= vx && vx <= vx_prec + 5 && (vy_prec - 5) <= vy && vy <= vy_prec + 5) { // Al verificar el puntero notamos que no se mueve mucho de su posicion actual: (en este caso un cuadro de 10px)
     count++;
     if(valor_click == '1' && count == 25){ // el click  ocurrirá despues de 2 segundos en los que el puntero ha parado en el cuadro de 10px: 20ms de retraso por 100 veces es 2000ms = 2s
-      mouseLeftClick();
+      //mouseLeftClick();
     }else if(valor_click == '2' && count == 50){
-      mouseLeftClick();
+      //mouseLeftClick();
     }else if(valor_click == '3' && count == 75){
-      mouseLeftClick();
+      //mouseLeftClick();
     }else {
       if(Mouse.isPressed(MOUSE_LEFT)) {
         Mouse.release(MOUSE_LEFT);
@@ -112,7 +141,7 @@ void mouseLeftClick(){
   if(TOGGLE_LEFT_CLICK){
     if(!Mouse.isPressed(MOUSE_LEFT)) {
       Mouse.press(MOUSE_LEFT);
-      delay(500);
+      delay(50);
       Keyboard.releaseAll();
       count = 0;
     } 
