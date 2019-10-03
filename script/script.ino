@@ -12,6 +12,7 @@ const boolean LOG_VALUES = false; //<--- For logging reading values
 const boolean OPEN_KEYBOARD = false; //<--- Config for oppening the on screan keyboard when connection
 const boolean TOGGLE_LEFT_CLICK = true; //<--- For canceling the LEFT_CLICK action;
 const boolean TOGGLE_RIGHT_CLICK = true; //<--- For canceling the RIGHT_CLICK action;
+const boolean AUTO_CLICK = false; //<--- For canceling the AUTO_CLICK action;
 //END COFIGURATION
 
 //VARIABLES
@@ -22,12 +23,12 @@ typedef struct{ //<--- Package to be transmited by radio structure
 
 radioPackage RadioPackage; //<--- Struct type / Variable name
 int16_t ax, ay, az, gx, gy, gz; //Variables para enviar 
-int vx, vy, vx_prec, vy_prec;
+int vx, vy, previous_vx, previous_vy;
 int count = 0;
 int cont = 0;
 int contar = 0;
 char valor_click= '2';
-int sens = 200;
+int sensibility = 200;
 char serialReadedValues;
 char valores2[4];
 byte address[6] = "00001"; //<--- Radio NRF24L01 Address
@@ -86,34 +87,15 @@ void loop() {
 
   //Estos valores van a luego ser asignados a la posicion del mouse y estan siendo
   //Divididos por la sensibilidad para reducir el movimiento
-  vx = (gx + 200) / sens;
-  vy = -(gz + 60) / sens;
+  vx = (gx + 200) / sensibility; // 200 es el valor del eje x que permite acercarnos al 0 absoluto del eje
+  vy = -(gz + 60) / sensibility; // 60 es el valor del eje z que nos permite acercarnos al 0 absoluto del eje
 
   Mouse.move(vx, vy);
 
-
-  if( (vx_prec - 5) <= vx && vx <= vx_prec + 5 && (vy_prec - 5) <= vy && vy <= vy_prec + 5) { // Al verificar el puntero notamos que no se mueve mucho de su posicion actual: (en este caso un cuadro de 10px)
-    count++;
-    if(valor_click == '1' && count == 25){ // el click  ocurrirá despues de 2 segundos en los que el puntero ha parado en el cuadro de 10px: 20ms de retraso por 100 veces es 2000ms = 2s
-      //mouseLeftClick();
-    }else if(valor_click == '2' && count == 50){
-      //mouseLeftClick();
-    }else if(valor_click == '3' && count == 75){
-      //mouseLeftClick();
-    }else {
-      //if(Mouse.isPressed(MOUSE_LEFT)) {
-        //Mouse.release(MOUSE_LEFT);
-      //}
-    }
-  }else {
-    vx_prec = vx;
-    vy_prec = vy;
-    count = 0;
-  }
+  autoClick();
 
   delay(20);
 }
-
 
 void printConfig(){
   Serial.println("CONFIGURATION");
@@ -170,5 +152,28 @@ void selectionClick(){
   }else{
     Mouse.release(MOUSE_LEFT);
     Mouse.press(MOUSE_LEFT);
+  }
+}
+
+void autoClick(){
+  if(AUTO_CLICK){
+    if( (previous_vx - 10) <= vx && vx <= previous_vx + 10 && (previous_vy - 10) <= vy && vy <= previous_vy + 10) { // Al verificar el puntero notamos que no se mueve mucho de su posicion actual: (en este caso un cuadro de 10px)
+      count++;
+      if(valor_click == '1' && count == 25){ // el click  ocurrirá despues de 2 segundos en los que el puntero ha parado en el cuadro de 10px: 20ms de retraso por 100 veces es 2000ms = 2s
+        //mouseLeftClick();
+      }else if(valor_click == '2' && count == 50){
+        //mouseLeftClick();
+      }else if(valor_click == '3' && count == 75){
+        //mouseLeftClick();
+      }else {
+        //if(Mouse.isPressed(MOUSE_LEFT)) {
+          //Mouse.release(MOUSE_LEFT);
+        //}
+      }
+    } else {
+      previous_vx = vx;
+      previous_vy = vy;
+      count = 0;
+    }
   }
 }
