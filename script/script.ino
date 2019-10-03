@@ -1,37 +1,33 @@
 //#include <Wire.h>
-#include <I2Cdev.h> //Libreria necesaria para el giroscopio
-#include <MPU6050.h> //Libreria giroscopio
-#include <Keyboard.h> //Libreria de teclado
-#include <Mouse.h> //Libreria de mouse
-#include <SPI.h>
-#include "nRF24L01.h"
-#include "RF24.h"
+#include <I2Cdev.h> //<-- Library required by MPU-6050
+#include <MPU6050.h> //<-- MPU-6050 library
+#include <Keyboard.h> //<-- Keyboard library
+#include <Mouse.h> //<-- Mouse library
+#include <SPI.h>  //<-- Bus library
+#include "nRF24L01.h" //<-- Radio library
+#include "RF24.h" //<-- Radio library
 
 //CONFIGURATION
-const boolean LOG_VALUES = false; //<--- For logging reading values
-const boolean OPEN_KEYBOARD = false; //<--- Config for oppening the on screan keyboard when connection
-const boolean TOGGLE_LEFT_CLICK = true; //<--- For canceling the LEFT_CLICK action;
-const boolean TOGGLE_RIGHT_CLICK = true; //<--- For canceling the RIGHT_CLICK action;
-const boolean AUTO_CLICK = false; //<--- For canceling the AUTO_CLICK action;
+const boolean LOG_VALUES = false; //<-- For logging reading values
+const boolean OPEN_KEYBOARD = false;  //<-- Config for oppening the on screan keyboard when connection
+const boolean TOGGLE_LEFT_CLICK = true; //<-- For canceling the LEFT_CLICK action;
+const boolean TOGGLE_RIGHT_CLICK = true;  //<-- For canceling the RIGHT_CLICK action;
+const boolean AUTO_CLICK = false; //<-- For canceling the AUTO_CLICK action;
 //END COFIGURATION
 
 //VARIABLES
-typedef struct{ //<--- Package to be transmited by radio structure
+typedef struct{ //<-- Package to be transmited by radio structure
   const char module[5] = "";
   char action[15] = "";
-} radioPackage; //<--- Struct type
+} radioPackage; //<-- Struct type
 
-radioPackage RadioPackage; //<--- Struct type / Variable name
-int16_t ax, ay, az, gx, gy, gz; //Variables para enviar 
-int vx, vy, previous_vx, previous_vy;
-int count = 0;
-int cont = 0;
-int contar = 0;
+radioPackage RadioPackage;  //<-- Struct type / Variable name
+int16_t ax, ay, az, gx, gy, gz; //<-- MPU-6050 variables 
+int vx, vy, previous_vx, previous_vy; //<-- Variables to move the cursor (vx, vy) and to compare movement (previous_vx, previous_vy)
+int delayClickCount = 0;
 char valor_click= '2';
 int sensibility = 200;
-char serialReadedValues;
-char valores2[4];
-byte address[6] = "00001"; //<--- Radio NRF24L01 Address
+byte address[6] = "00001";  //<-- Radio NRF24L01 Address
 
 //INITIALIZATIONS
 MPU6050 mpu;
@@ -41,11 +37,11 @@ RF24 radio(9,10);
 /*-------------- SETUP --------------*/
 
 void setup() {
-  Serial.begin(9600); //<--- Serial monitor begin
+  Serial.begin(9600); //<-- Serial monitor begin
   
   //NRF24L01 Alimentation 3.3v pin config
-  pinMode(4, OUTPUT); //<--- Define the pin output
-  digitalWrite(4, HIGH); //<--- Flow voltaje through pin
+  pinMode(4, OUTPUT); //<-- Define the pin output
+  digitalWrite(4, HIGH);  //<-- Flow voltaje through pin
   
   //RADIO
   radio.begin();
@@ -57,16 +53,16 @@ void setup() {
   //KEYBOARD
   Keyboard.begin();
   delay(1000);
-  openScreenKeyboard(); //This triggers the onScrean Keyboard
+  openScreenKeyboard(); //<-- This triggers the onScrean Keyboard
   
   //MPU
   Wire.begin();
   mpu.initialize();
-  if(!mpu.testConnection()) { //<--- Wait till MPU6050 returns a truly connection
+  if(!mpu.testConnection()) { //<-- Wait till MPU6050 returns a truly connection
     while (1);
   }
   
-  printConfig(); //<--- Print current configuration
+  printConfig();  //<-- Print current configuration
 }
 
 
@@ -85,14 +81,16 @@ void loop() {
 
   mpu.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
 
-  //Estos valores van a luego ser asignados a la posicion del mouse y estan siendo
-  //Divididos por la sensibilidad para reducir el movimiento
-  vx = (gx + 200) / sensibility; // 200 es el valor del eje x que permite acercarnos al 0 absoluto del eje
-  vy = -(gz + 60) / sensibility; // 60 es el valor del eje z que nos permite acercarnos al 0 absoluto del eje
+  /*  
+      This values are going to be asigned to the position of the mouse
+      <vx> and <vy> are divided for the sensibility in order to CANCEL the parkinson
+  */
+  vx = (gx + 200) / sensibility;  //<--  200 is the value that allows <vx> to get close to the absolute cero of the x axis
+  vy = -(gz + 60) / sensibility;  //<--  60 is the value that allows <vx> to get close to the absolute cero of the z axis
 
   Mouse.move(vx, vy);
 
-  autoClick();
+  autoClick();  //<-- If the AUTO_CLICK config is true, this function will perform click automaticly
 
   delay(20);
 }
@@ -122,7 +120,7 @@ void evaluateMouseClick(){
   }else if(!strcmp(RadioPackage.action, "RIGHT_CLICK")){
     mouseRightClick();
   }else if(!strcmp(RadioPackage.action, "SELECTION")){
-    selectionClick(); //<--- Send 1 to initializate selection
+    selectionClick(); //<-- Send 1 to initializate selection
   }else{
   }
 }
@@ -157,13 +155,14 @@ void selectionClick(){
 
 void autoClick(){
   if(AUTO_CLICK){
-    if( (previous_vx - 10) <= vx && vx <= previous_vx + 10 && (previous_vy - 10) <= vy && vy <= previous_vy + 10) { // Al verificar el puntero notamos que no se mueve mucho de su posicion actual: (en este caso un cuadro de 10px)
-      count++;
-      if(valor_click == '1' && count == 25){ // el click  ocurrirá despues de 2 segundos en los que el puntero ha parado en el cuadro de 10px: 20ms de retraso por 100 veces es 2000ms = 2s
+    // This conditional verifies that the mouse is not moving (20x20 maximum)
+    if( (previous_vx - 10) <= vx && vx <= previous_vx + 10 && (previous_vy - 10) <= vy && vy <= previous_vy + 10) {
+      delayClickCount++;
+      if(valor_click == '1' && delayClickCount == 25){  //<-- The click will occur after 2 seconds in which the mouse is in the same place
         //mouseLeftClick();
-      }else if(valor_click == '2' && count == 50){
+      }else if(valor_click == '2' && delayClickCount == 50){
         //mouseLeftClick();
-      }else if(valor_click == '3' && count == 75){
+      }else if(valor_click == '3' && delayClickCount == 75){
         //mouseLeftClick();
       }else {
         //if(Mouse.isPressed(MOUSE_LEFT)) {
@@ -173,7 +172,7 @@ void autoClick(){
     } else {
       previous_vx = vx;
       previous_vy = vy;
-      count = 0;
+      delayClickCount = 0;
     }
   }
 }
