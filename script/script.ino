@@ -40,8 +40,8 @@ void setup() {
   Serial.begin(9600); //<-- Serial monitor begin
   
   //NRF24L01 Alimentation 3.3v pin config
-  pinMode(4, OUTPUT); //<-- Define the pin output
-  digitalWrite(4, HIGH);  //<-- Flow voltaje through pin
+  pinMode(A0, OUTPUT); //<-- Define the pin output
+  digitalWrite(A0, HIGH);  //<-- Flow voltaje through pin
   
   //RADIO
   radio.begin();
