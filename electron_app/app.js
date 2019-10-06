@@ -1,28 +1,37 @@
 const serialport = require('serialport');
 
 class app {
-    async constructor() {
+    constructor() {
+        this.establishArduinoComunication();
+    }
+
+    establishArduinoComunication = async () => {
         this.serialForm = document.getElementById('serialForm');
         this.inputMessage = document.getElementById('inputMessage');
         this.ARDUINO_ADRESS = await this.findArduinoPort();
-        this.SerialPort = new serialport(this.ARDUINO_ADRESS);
-        this.serialForm.addEventListener('submit', send(e));
+        this.SerialPort = new serialport(this.ARDUINO_ADRESS, { baudRate: 9600 });
+        this.serialForm.addEventListener('submit', this.send);
     }
 
     findArduinoPort = async () => {
-        await serialport.list((error, ports) => {
-            if(error){
-                console.log(error);
+        try {
+            const availablePorts = await serialport.list();
+            const MY_ARDUINO = availablePorts.filter(port => port.manufacturer.match(/Arduino LLC/))[0];
+
+            if(MY_ARDUINO){
+                throw "Arduino not found";
             }
-    
-            const MY_ARDUINO = ports.filter(port => port.manufacturer === 'Arduino LLC')[0];
-            MY_ARDUINO.comName;
-        });
+            
+            return MY_ARDUINO.comName;
+        } catch (error) {
+            console.log(error);
+        }
     }
 
-    send = () => {
+    send = (e) => {
+        e.preventDefault();
         this.SerialPort.write(this.inputMessage.value);
-    }
+    }   
 }
 
 const myApp = new app();
