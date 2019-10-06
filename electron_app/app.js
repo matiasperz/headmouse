@@ -18,7 +18,7 @@ class app {
             const availablePorts = await serialport.list();
             const MY_ARDUINO = availablePorts.filter(port => port.manufacturer.match(/Arduino LLC/))[0];
 
-            if(MY_ARDUINO){
+            if(!MY_ARDUINO){
                 throw "Arduino not found";
             }
             
