@@ -10,7 +10,7 @@ int lastChangeRight = 0;  // Change in IR level
 int changeThreshold = 5; // How hard a rising edge do we need?
  
 //visualization
-int primaryClickDuration = 250;        // Length of visualization
+int primaryClickDuration = 100;        // Length of visualization
 int secondaryClickDuration = 500;
 float lastStartRight = 0;       // Last start of visualization
 float lastStartLeft = 0;
@@ -24,13 +24,9 @@ void setup() {
 void loop() {
   int rightSensorValue = analogRead(rightSensorPin); //1020
   int leftSensorValue = analogRead(leftSensorPin); //1020
-  
-  if(Serial.available()){
-    Mouse.click(MOUSE_LEFT);
-  }
 
-  printValues(leftSensorValue, rightSensorValue);
-  
+  //printValues(leftSensorValue, rightSensorValue);
+
   // look for rising edges
   lastChangeLeft = leftSensorValue - lastLevelLeft; //1020
   lastLevelLeft = leftSensorValue; //1020
@@ -53,23 +49,35 @@ void printValues(int _leftSensorValue, int _rightSensorValue){
 void evaluateClick(){
   int _currentMillis = millis();
   
-  if (lastChangeRight >=changeThreshold) {
-    Serial.print("TUVE UN CAMBIO! ");
-    Serial.println(lastChangeRight);
+  if (lastChangeRight <= -changeThreshold) {
+    lastStartRight = _currentMillis;
+  }
+  if (lastChangeRight >= changeThreshold) {
+    int _millisDiff = _currentMillis - lastStartRight;
 
-    if (_currentMillis >= (lastStartRight + secondaryClickDuration)) {
-      Serial.println(" -> SECUNDARIOOOOOOOOOOOOOOOOO");
-    } else if (_currentMillis >= (lastStartRight + primaryClickDuration)) {
-      Serial.println("PRIMAAAAAAAAARIOOOOOOOOOOO");
-    }
+    if(_millisDiff >= secondaryClickDuration){
+      Mouse.press(MOUSE_LEFT);
+    }else if(_millisDiff >= primaryClickDuration){
+      Mouse.click(MOUSE_RIGHT);
+    } 
 
     lastStartRight = _currentMillis;
   }
 
-  if (lastChangeLeft >=changeThreshold) {
+  if (lastChangeLeft <= -changeThreshold) {
     lastStartLeft = _currentMillis;
-    Mouse.click(MOUSE_LEFT);
   }
-  if (_currentMillis >= lastStartLeft + primaryClickDuration) {
-  }  
+  if (lastChangeLeft >= changeThreshold) {
+    int _millisDiff = _currentMillis - lastStartLeft;
+
+    if(_millisDiff >= secondaryClickDuration){
+      Mouse.click(MOUSE_LEFT);
+      delay(20);
+      Mouse.click(MOUSE_LEFT);
+    }else if(_millisDiff >= primaryClickDuration){
+      Mouse.click(MOUSE_LEFT);      
+    } 
+
+    lastStartLeft = _currentMillis;
+  } 
 }
