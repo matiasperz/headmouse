@@ -6,7 +6,8 @@
     "react": "^16.10.2",
     "react-circle-slider": "^1.6.2",
     "react-dom": "^16.10.2",
-    "react-scripts": "3.2.0"
+    "react-scripts": "3.2.0",
+    "react-switch": "^5.0.1"
   },
   "scripts": {
     "start": "react-scripts start",
