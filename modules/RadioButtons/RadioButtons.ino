@@ -22,6 +22,8 @@ radioPackage RadioPackage; //<--- Struct type / Variable name
 const int left_sensor_pin = 2; //<--- Left sensor pin config
 const int right_sensor_pin = 3; //<--- Right sensor pin config
 boolean newInteraction; //<--- Variable for detenting new touches
+int lastStateRight;
+int lastStateLeft;
 const byte address[6] = "00001"; //<--- Address for the NRF24L01 emitter
 
 //INITIALIZATIONS
@@ -48,6 +50,9 @@ void setup() {
 void loop() {
   Readings.RIGHT_CLICK = digitalRead(right_sensor_pin);
   Readings.LEFT_CLICK = digitalRead(left_sensor_pin);
+
+  lastStateRight = Readings.RIGHT_CLICK;
+  lastStateLeft = Readings.LEFT_CLICK;
 
   printValues();
   newInteraction = evaluateClick();

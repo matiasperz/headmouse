@@ -7,7 +7,7 @@ int lastLevelLeft = 0;
 int lastLevelRight = 0;    // Previous IR level
 int lastChangeLeft = 0;
 int lastChangeRight = 0;  // Change in IR level
-int changeThreshold = 5; // How hard a rising edge do we need?
+int changeThreshold = 6; // How hard a rising edge do we need?
  
 //visualization
 int primaryClickDuration = 100;        // Length of visualization
@@ -16,9 +16,7 @@ float lastStartRight = 0;       // Last start of visualization
 float lastStartLeft = 0;
 
 void setup() {
-  Serial.begin(9600);      // Debug constructor
-  pinMode(8, OUTPUT);
-  digitalWrite(8, LOW);
+  Serial.begin(9600);
 }
 
 void loop() {
@@ -56,7 +54,12 @@ void evaluateClick(){
     int _millisDiff = _currentMillis - lastStartRight;
 
     if(_millisDiff >= secondaryClickDuration){
-      Mouse.press(MOUSE_LEFT);
+      if(Mouse.isPressed(MOUSE_LEFT)){
+        Mouse.release(MOUSE_LEFT);
+        Mouse.press(MOUSE_LEFT);
+      }else{
+        Mouse.press(MOUSE_LEFT);
+      }
     }else if(_millisDiff >= primaryClickDuration){
       Mouse.click(MOUSE_RIGHT);
     } 
