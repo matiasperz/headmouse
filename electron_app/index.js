@@ -7,11 +7,11 @@ let win
 createWindow = _ => {
   // Create the browser window.
   win = new BrowserWindow({
-    width: 1000,
+    width: 800,
     height: 800,
     frame: false,
     backgroundColor: '#635175',
-    alwaysOnTop: true,
+    alwaysOnTop: false,
     webPreferences: {
       nodeIntegration: true
     }
@@ -21,7 +21,7 @@ createWindow = _ => {
   win.loadURL('http://localhost:3000');
 
   // Open the DevTools.
-  win.webContents.openDevTools()
+  //win.webContents.openDevTools()
 
   // Emitted when the window is closed.
   win.on('closed', _ => {

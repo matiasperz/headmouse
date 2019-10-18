@@ -57,61 +57,79 @@ class Layout extends Component {
                         title={'Click'}
                         description={'Select the method to perform clicks'}
                     />
-                    <div className="column" style={{ 'justifyContent': 'space-between'}}>
-                        <a
+                    <div className="switch">
+                        <button
                             onClick={_ => this.handleClickChange('autoclick')}
                             className="button">
                             Autoclick
-                        </a>
-                        <a
+                        </button>
+                        <button
                             onClick={_ => this.handleClickChange('buttons')}
                             className="button">
                             Buttons
-                            </a>
-                        <a
+                        </button>
+                        <button
                             onClick={_ => this.handleClickChange('glasses')}
                             className="button">
                             Glasses
-                        </a>
+                        </button>
                     </div>
                 </Section>
-                <div className="column">
-                    <Section>
-                        <Header
-                            title={'Invert click'}
-                            description={'Change click actions'}
-                        />
-                        <Switch
-                            disabled={true}
-                            className="switch"
-                            onColor='#CE9FFC'
-                            offColor='#7367f0'
-                            onChange={this.handleInverterChange}
-                            checked={this.state.inverted}
-                            height={50}
-                            width={100}
-                        />
-                    </Section>
-                    <Section>
-                        <Header
-                            title={'Delay'}
-                            description={'Select the click delay on auto-click mode'}
-                        />
-                        <CircleSlider
-                            disabled={true}
-                            value={this.state.delay}
-                            max={4}
-                            knobRadius={12}
-                            circleWidth={10}
-                            showTooltip={true}
-                            circleColor={'#CEC9D4'}
-                            tooltipColor={'#FFFFFF'}
-                            gradientColorFrom={'#CE9FFC'}
-                            gradientColorTo={'#7367f0'}
-                            onChange={this.handleDelayChange}
-                        />
-                    </Section>
-                </div>
+                <Section
+                    disabled={this.state.click === 'autoclick' ? true : false}
+                >
+                    <Header
+                        title={'Invert click'}
+                        description={'Change click actions'}
+                    />
+                    <Switch
+                        disabled={this.state.click === 'autoclick' ? true : false}
+                        className="switch"
+                        onColor='#CE9FFC'
+                        offColor='#7367f0'
+                        onChange={this.handleInverterChange}
+                        checked={this.state.inverted}
+                        height={50}
+                        width={100}
+                    />
+                </Section>
+                <Section
+                    disabled={this.state.click === 'autoclick' ? false : true}
+                >
+                    <Header
+                        title={'Delay'}
+                        description={'Select the click delay on auto-click mode'}
+                    />
+                    <button
+                        disabled={this.state.click === 'autoclick' ? false : true}
+                        onClick={_ => {
+                            if (this.state.delay + 1 < 5) return this.handleDelayChange(this.state.delay + 1)
+                        }}
+                        className={`button delay-button ${this.state.click !== 'autoclick' ? null : 'hoverable'}`}>
+                        +
+                    </button>
+                    <CircleSlider
+                        disabled={this.state.click === 'autoclick' ? false : true}
+                        value={this.state.delay}
+                        max={4}
+                        knobRadius={12}
+                        circleWidth={10}
+                        showTooltip={true}
+                        circleColor={'#CEC9D4'}
+                        tooltipColor={'#FFFFFF'}
+                        gradientColorFrom={'#CE9FFC'}
+                        gradientColorTo={'#7367f0'}
+                        onChange={this.handleDelayChange}
+                    />
+                    <button
+                        disabled={this.state.click === 'autoclick' ? false : true}
+                        onClick={_ => {
+                            if (this.state.delay - 1 > -1) return this.handleDelayChange(this.state.delay - 1)
+                        }}
+                        className={`button delay-button ${this.state.click !== 'autoclick' ? null : 'hoverable'}`}>
+                        -
+                    </button>
+                </Section>
             </div>
         );
     }
