@@ -49,8 +49,7 @@ void evaluateClick(){
   
   if (lastChangeRight <= -changeThreshold) {
     lastStartRight = _currentMillis;
-  }
-  if (lastChangeRight >= changeThreshold) {
+  }else if (lastChangeRight >= changeThreshold) {
     int _millisDiff = _currentMillis - lastStartRight;
 
     if(_millisDiff >= secondaryClickDuration){
@@ -69,8 +68,7 @@ void evaluateClick(){
 
   if (lastChangeLeft <= -changeThreshold) {
     lastStartLeft = _currentMillis;
-  }
-  if (lastChangeLeft >= changeThreshold) {
+  } else if (lastChangeLeft >= changeThreshold) {
     int _millisDiff = _currentMillis - lastStartLeft;
 
     if(_millisDiff >= secondaryClickDuration){

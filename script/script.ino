@@ -16,7 +16,7 @@ boolean TOGGLE_RIGHT_CLICK = true;  //<-- For canceling the RIGHT_CLICK action;
 char *MODULE = "RADIO_BUTTONS"; //<-- For canceling the AUTO_CLICK action;
 int MOUSE_SENSIBILITY = 200;
 int CLICK_DELAY = 1;
-//END COFIGURATION
+
 
 //VARIABLES
 typedef struct { //<-- Package to be transmited by radio structure
@@ -28,10 +28,10 @@ radioPackage RadioPackage;  //<-- Struct type / Variable name
 int16_t ax, ay, az, gx, gy, gz; //<-- MPU-6050 variables
 int vx, vy, previous_vx, previous_vy; //<-- Variables to move the cursor (vx, vy) and to compare movement (previous_vx, previous_vy)
 int delayClickCount = 0;
-
+int currentMillis = 0;
 byte address[6] = "00001";  //<-- Radio NRF24L01 Address
 
-/* PC COMMUNICATOIN VARIABLES */
+/* PC_COMMUNICATOIN VARIABLES */
 int i;
 int response;
 jsmn_parser jsmn_parser_instance; // 
@@ -41,6 +41,25 @@ char const *JSON_STRING;
 String RECEIVED_STRING;
 char JSON_KEY[13];
 char JSON_VALUE[13];
+
+
+/* INFRA_GLASSES VARIABLES */
+int rightSensorPin  = A2;
+int leftSensorPin = A3;    // IR Sensor
+
+int lastLevelLeft = 0;
+int lastLevelRight = 0;    // Previous IR level
+int lastChangeLeft = 0;
+int lastChangeRight = 0;  // Change in IR level
+int changeThreshold = 5; // How hard a rising edge do we need?
+
+int primaryClickDuration = 100;        // Length of visualization
+int secondaryClickDuration = 500;
+float lastStartRight = 0;       // Last start of visualization
+float lastStartLeft = 0;
+int infraGlassReadingThreshold = 100;
+int infraGlassLastReading = 0;
+
 
 //INITIALIZATIONS
 MPU6050 mpu;
@@ -102,7 +121,7 @@ void loop() {
     readIncomingJson(); // <-- If a Serial packet is available will be interpretated by this function
   }
 
-  delay(20);
+  delay(10);
 }
 
 void printConfig() {
@@ -136,6 +155,7 @@ void mouseLeftClick() {
     Mouse.click(MOUSE_LEFT);
   } else {
     Mouse.release(MOUSE_LEFT);
+    Mouse.click(MOUSE_LEFT);
   }
 }
 
@@ -148,7 +168,20 @@ void mouseRightClick() {
   }
 }
 
-void selectionClick() {
+void mouseDoubleClick(){
+  if (!Mouse.isPressed(MOUSE_LEFT)) {
+    Mouse.click(MOUSE_LEFT);
+    delay(20);
+    Mouse.click(MOUSE_LEFT);
+  } else {
+    Mouse.release(MOUSE_LEFT);
+    Mouse.click(MOUSE_LEFT);
+    delay(20);
+    Mouse.click(MOUSE_LEFT);
+  }
+}
+
+void mouseSelectionClick() {
   if (!Mouse.isPressed(MOUSE_LEFT)) {
     Mouse.press(MOUSE_LEFT);
   } else {
@@ -157,9 +190,21 @@ void selectionClick() {
   }
 }
 
+void evaluatePackageClick(){
+  if (!strcmp(RadioPackage.action, "LEFT_CLICK")) {
+    mouseLeftClick();
+  } else if (!strcmp(RadioPackage.action, "RIGHT_CLICK")) {
+    mouseRightClick();
+  } else if (!strcmp(RadioPackage.action, "SELECTION")) {
+    mouseSelectionClick();
+  } else if (!strcmp(RadioPackage.action, "DOUBLE_CLICK")){
+    mouseDoubleClick();
+  }
+}
+
 void makeModuleAction(){
   if(strcmp(MODULE, "INFRA_GLASSES") == 0){
-    
+    infraGlasses();
   }else if(strcmp(MODULE, "RADIO_BUTTONS") == 0){
     radioButtons();
   }else if(strcmp(MODULE, "AUTO_CLICK") == 0){
@@ -167,31 +212,72 @@ void makeModuleAction(){
   }
 }
 
-void evaluateMouseClick() {
-  if (!strcmp(RadioPackage.action, "LEFT_CLICK")) {
-    mouseLeftClick();
-  } else if (!strcmp(RadioPackage.action, "RIGHT_CLICK")) {
-    mouseRightClick();
-  } else if (!strcmp(RadioPackage.action, "SELECTION")) {
-    selectionClick(); //<-- Send 1 to initializate selection
-  } else {
-  }
-}
-
 void radioButtons(){
   if (radio.available()) {
     radio.read(&RadioPackage, sizeof(RadioPackage));
-    //Print readings
-    Serial.print(RadioPackage.module);
-    Serial.print(":");
-    Serial.println(RadioPackage.action);
-
-    evaluateMouseClick();
+    evaluatePackageClick();
   }
 }
 
+void printValues(int _leftSensorValue, int _rightSensorValue){
+  Serial.print("Left");
+  Serial.println(_leftSensorValue);  // Read Data
+  Serial.print("Right");
+  Serial.println(_rightSensorValue);  // Read Data  
+}
+
+void infraGlasses(){
+  currentMillis = millis();
+  
+  if((currentMillis - infraGlassLastReading) >= infraGlassReadingThreshold){
+    int rightSensorValue = analogRead(rightSensorPin); //1020
+    int leftSensorValue = analogRead(leftSensorPin); //1020
+  
+    printValues(leftSensorValue, rightSensorValue);
+  
+    // look for rising edges
+    lastChangeLeft = leftSensorValue - lastLevelLeft; //1020
+    lastLevelLeft = leftSensorValue; //1020
+  
+    lastChangeRight = rightSensorValue - lastLevelRight;
+    lastLevelRight = rightSensorValue;
+  
+    /* --------------- Evaluate click ---------------*/
+    
+    if (lastChangeRight <= -changeThreshold) {
+      lastStartRight = currentMillis;
+    }else if (lastChangeRight >= changeThreshold) {
+      int _millisDiff = currentMillis - lastStartRight;
+  
+      if(_millisDiff >= secondaryClickDuration){
+        mouseSelectionClick();
+      }else if(_millisDiff >= primaryClickDuration){
+        mouseRightClick();
+      }
+  
+      lastStartRight = currentMillis;
+    }
+  
+    if (lastChangeLeft <= -changeThreshold) {
+      lastStartLeft = currentMillis;
+    } else if (lastChangeLeft >= changeThreshold) {
+      int _millisDiff = currentMillis - lastStartLeft;
+  
+      if(_millisDiff >= secondaryClickDuration){
+        mouseDoubleClick();
+      }else if(_millisDiff >= primaryClickDuration){
+        mouseLeftClick();
+      } 
+  
+      lastStartLeft = currentMillis;
+    }
+
+    infraGlassLastReading = currentMillis;
+  }
+  
+}
+
 void autoClick() { //TODO: This has to be improved
-    Serial.println("ALOOO");
     // This conditional verifies that the mouse is not moving (20x20 maximum)
     if ( (previous_vx - 10) <= vx && vx <= previous_vx + 10 && (previous_vy - 10) <= vy && vy <= previous_vy + 10) {
       delayClickCount++;
@@ -221,7 +307,6 @@ static int jsoneq(const char *json, jsmntok_t *tok, const char *s) {
   }
   return -1;
 }
-
 
 void readIncomingJson(){ //<-- Interpretates the JSON string
   RECEIVED_STRING = Serial.readString(); //Reading the whole serial available string
@@ -255,11 +340,3 @@ void configOptions(char *type, char *payload){ //<-- This has all the logic of e
     MOUSE_SENSIBILITY = atoi(payload);
   }
 }
-
-
-/*Serial.print("Type: ");
-    Serial.println(type);
-    
-    Serial.print("Payload: ");
-    Serial.println();
-*/
