@@ -6,13 +6,16 @@
 #include <SPI.h>  //<-- Bus library
 #include "nRF24L01.h" //<-- Radio library
 #include "RF24.h" //<-- Radio library
+#include "jsmn.h" //JSMN library
 
 //CONFIGURATION
-const boolean LOG_VALUES = false; //<-- For logging reading values
-const boolean OPEN_KEYBOARD = true;  //<-- Config for oppening the on screan keyboard when connection
-const boolean TOGGLE_LEFT_CLICK = true; //<-- For canceling the LEFT_CLICK action;
-const boolean TOGGLE_RIGHT_CLICK = true;  //<-- For canceling the RIGHT_CLICK action;
-const boolean AUTO_CLICK = false; //<-- For canceling the AUTO_CLICK action;
+boolean LOG_VALUES = false; //<-- For logging reading values
+boolean OPEN_KEYBOARD = false;  //<-- Config for oppening the on screan keyboard when connection
+boolean TOGGLE_LEFT_CLICK = true; //<-- For canceling the LEFT_CLICK action;
+boolean TOGGLE_RIGHT_CLICK = true;  //<-- For canceling the RIGHT_CLICK action;
+char *MODULE = "RADIO_BUTTONS"; //<-- For canceling the AUTO_CLICK action;
+int MOUSE_SENSIBILITY = 200;
+int CLICK_DELAY = 1;
 //END COFIGURATION
 
 //VARIABLES
@@ -25,9 +28,19 @@ radioPackage RadioPackage;  //<-- Struct type / Variable name
 int16_t ax, ay, az, gx, gy, gz; //<-- MPU-6050 variables
 int vx, vy, previous_vx, previous_vy; //<-- Variables to move the cursor (vx, vy) and to compare movement (previous_vx, previous_vy)
 int delayClickCount = 0;
-char valor_click = '2';
-int sensibility = 200;
+
 byte address[6] = "00001";  //<-- Radio NRF24L01 Address
+
+/* PC COMMUNICATOIN VARIABLES */
+int i;
+int response;
+jsmn_parser jsmn_parser_instance; // 
+jsmntok_t jsmn_token_array[10]; // We expect no more than 10 tokens
+
+char const *JSON_STRING;
+String RECEIVED_STRING;
+char JSON_KEY[13];
+char JSON_VALUE[13];
 
 //INITIALIZATIONS
 MPU6050 mpu;
@@ -62,6 +75,9 @@ void setup() {
     while (1);
   }
 
+  //JSMN
+  jsmn_init(&jsmn_parser_instance); // Initializing JSMN
+  
   printConfig();  //<-- Print current configuration
 }
 
@@ -69,36 +85,36 @@ void setup() {
 /*-------------- LOOP --------------*/
 
 void loop() {
-  if ( radio.available()) {
-    radio.read(&RadioPackage, sizeof(RadioPackage));
-    //Print readings
-    Serial.print(RadioPackage.module);
-    Serial.print(":");
-    Serial.println(RadioPackage.action);
-
-    evaluateMouseClick();
-  }
+  makeModuleAction();
 
   mpu.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
 
   /*
       This values are going to be asigned to the position of the mouse
-      <vx> and <vy> are divided for the sensibility in order to CANCEL the parkinson
+      <vx> and <vy> are divided for the MOUSE_SENSIBILITY in order to CANCEL the parkinson
   */
-  vx = (gx + 200) / sensibility;  //<--  200 is the value that allows <vx> to get close to the absolute cero of the x axis
-  vy = -(gz + 60) / sensibility;  //<--  60 is the value that allows <vx> to get close to the absolute cero of the z axis
+  vx = (gx + 200) / MOUSE_SENSIBILITY;  //<--  200 is the value that allows <vx> to get close to the absolute cero of the x axis
+  vy = - (gz + 60) / MOUSE_SENSIBILITY;  //<--  60 is the value that allows <vx> to get close to the absolute cero of the z axis
 
   Mouse.move(vx, vy);
 
-  autoClick();  //<-- If the AUTO_CLICK config is true, this function will perform click automaticly
+  if(Serial.available()){
+    readIncomingJson(); // <-- If a Serial packet is available will be interpretated by this function
+  }
 
   delay(20);
 }
 
 void printConfig() {
-  Serial.println("CONFIGURATION");
+  Serial.println("CONFIGURATION:");
   Serial.println("LOG_VALUES: " + LOG_VALUES);
   Serial.println("OPEN_KEYBOARD: " + OPEN_KEYBOARD);
+  
+  Serial.print("MODULE: ");
+  Serial.println(MODULE);
+  
+  Serial.println("MOUSE_SENSIBILITY: " + MOUSE_SENSIBILITY);
+  Serial.println("CLICK_DELAY: " + CLICK_DELAY);
 }
 
 void openScreenKeyboard() {
@@ -113,18 +129,6 @@ void openScreenKeyboard() {
     Keyboard.releaseAll();
   }
 }
-
-void evaluateMouseClick() {
-  if (!strcmp(RadioPackage.action, "LEFT_CLICK")) {
-    mouseLeftClick();
-  } else if (!strcmp(RadioPackage.action, "RIGHT_CLICK")) {
-    mouseRightClick();
-  } else if (!strcmp(RadioPackage.action, "SELECTION")) {
-    selectionClick(); //<-- Send 1 to initializate selection
-  } else {
-  }
-}
-
 
 //Mouse clicks
 void mouseLeftClick() {
@@ -153,16 +157,49 @@ void selectionClick() {
   }
 }
 
-void autoClick() {
-  if (AUTO_CLICK) {
+void makeModuleAction(){
+  if(strcmp(MODULE, "INFRA_GLASSES") == 0){
+    
+  }else if(strcmp(MODULE, "RADIO_BUTTONS") == 0){
+    radioButtons();
+  }else if(strcmp(MODULE, "AUTO_CLICK") == 0){
+    autoClick();
+  }
+}
+
+void evaluateMouseClick() {
+  if (!strcmp(RadioPackage.action, "LEFT_CLICK")) {
+    mouseLeftClick();
+  } else if (!strcmp(RadioPackage.action, "RIGHT_CLICK")) {
+    mouseRightClick();
+  } else if (!strcmp(RadioPackage.action, "SELECTION")) {
+    selectionClick(); //<-- Send 1 to initializate selection
+  } else {
+  }
+}
+
+void radioButtons(){
+  if (radio.available()) {
+    radio.read(&RadioPackage, sizeof(RadioPackage));
+    //Print readings
+    Serial.print(RadioPackage.module);
+    Serial.print(":");
+    Serial.println(RadioPackage.action);
+
+    evaluateMouseClick();
+  }
+}
+
+void autoClick() { //TODO: This has to be improved
+    Serial.println("ALOOO");
     // This conditional verifies that the mouse is not moving (20x20 maximum)
     if ( (previous_vx - 10) <= vx && vx <= previous_vx + 10 && (previous_vy - 10) <= vy && vy <= previous_vy + 10) {
       delayClickCount++;
-      if (valor_click == '1' && delayClickCount == 25) { //<-- The click will occur after 2 seconds in which the mouse is in the same place
+      if (CLICK_DELAY == 1 && delayClickCount == 25) { //<-- The click will occur after 2 seconds in which the mouse is in the same place
+        mouseLeftClick();
+      } else if (CLICK_DELAY == 2 && delayClickCount == 50) {
         //mouseLeftClick();
-      } else if (valor_click == '2' && delayClickCount == 50) {
-        //mouseLeftClick();
-      } else if (valor_click == '3' && delayClickCount == 75) {
+      } else if (CLICK_DELAY == 3 && delayClickCount == 75) {
         //mouseLeftClick();
       } else {
         //if(Mouse.isPressed(MOUSE_LEFT)) {
@@ -171,8 +208,58 @@ void autoClick() {
       }
     } else {
       previous_vx = vx;
+      
       previous_vy = vy;
       delayClickCount = 0;
     }
+}
+
+static int jsoneq(const char *json, jsmntok_t *tok, const char *s) {
+  if (tok->type == JSMN_STRING && (int)strlen(s) == tok->end - tok->start &&
+      strncmp(json + tok->start, s, tok->end - tok->start) == 0) { //Compares the current jsmn_token to the json_string
+    return 0;
+  }
+  return -1;
+}
+
+
+void readIncomingJson(){ //<-- Interpretates the JSON string
+  RECEIVED_STRING = Serial.readString(); //Reading the whole serial available string
+  JSON_STRING = RECEIVED_STRING.c_str(); //Removing the internal char array for manipulation
+  
+  response = jsmn_parse(&jsmn_parser_instance, JSON_STRING, strlen(JSON_STRING), jsmn_token_array, sizeof(jsmn_token_array) / sizeof(jsmn_token_array[0])); //
+
+  if (response < 0) {
+    Serial.print("Failed to parse JSON\n");
+  }
+
+  if (response < 1 || jsmn_token_array[0].type != JSMN_OBJECT) {
+    Serial.print("Object expected\n");
+    Serial.print(RECEIVED_STRING);
+  }
+
+  for (i = 1; i < response; i++) {
+    if (jsoneq(JSON_STRING, &jsmn_token_array[i], "type") == 0) {
+      strncpy(JSON_KEY, JSON_STRING + jsmn_token_array[i + 1].start, (jsmn_token_array[i + 1].end - jsmn_token_array[i + 1].start));
+    } else if (jsoneq(JSON_STRING, &jsmn_token_array[i], "payload") == 0) {
+      strncpy(JSON_VALUE, JSON_STRING + jsmn_token_array[i + 1].start, (jsmn_token_array[i + 1].end - jsmn_token_array[i + 1].start));
+      configOptions(JSON_KEY, JSON_VALUE);
+    }
+
+    i++;
   }
 }
+
+void configOptions(char *type, char *payload){ //<-- This has all the logic of each config
+  if(strcmp(type, "SENS") == 0){
+    MOUSE_SENSIBILITY = atoi(payload);
+  }
+}
+
+
+/*Serial.print("Type: ");
+    Serial.println(type);
+    
+    Serial.print("Payload: ");
+    Serial.println();
+*/

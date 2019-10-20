@@ -21,14 +21,14 @@ findArduinoPort().then((_port) => {
     const port = new SerialPort(_port, { baudRate: 9600 })
     const parser = new Readline();
     const obj = {
-        "type": "config",
-        "payload": "SENS_1"
+        "type": "SENS",
+        "payload": 300
     }
     
     port.pipe(parser)
-    setInterval(() => {
+    setTimeout(() => {
         port.write(JSON.stringify(obj) + '\n');
-    }, 2000);
+    }, 4000);
 
     parser.on('data', line => console.log(`> ${line}`))
 }).catch((err) => {
