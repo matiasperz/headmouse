@@ -8,7 +8,7 @@ createWindow = _ => {
   // Create the browser window.
   win = new BrowserWindow({
     width: 800,
-    height: 800,
+    height: 600,
     frame: false,
     backgroundColor: '#635175',
     alwaysOnTop: false,

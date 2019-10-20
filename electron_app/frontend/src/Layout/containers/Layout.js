@@ -60,17 +60,17 @@ class Layout extends Component {
                     <div className="switch">
                         <button
                             onClick={_ => this.handleClickChange('autoclick')}
-                            className="button">
+                            className={`button hoverable top-button ${this.state.click === 'autoclick' ? 'bordered' : null}`}>
                             Autoclick
                         </button>
                         <button
                             onClick={_ => this.handleClickChange('buttons')}
-                            className="button">
+                            className={`button hoverable center-button ${this.state.click === 'buttons' ? 'bordered' : null}`}>
                             Buttons
                         </button>
                         <button
                             onClick={_ => this.handleClickChange('glasses')}
-                            className="button">
+                            className={`button hoverable bottom-button ${this.state.click === 'glasses' ? 'bordered' : null}`}>
                             Glasses
                         </button>
                     </div>

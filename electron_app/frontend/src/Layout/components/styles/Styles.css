@@ -15,12 +15,15 @@
   display: flex;
   flex-direction: row;
   border-radius: 8px;
-  padding: 30px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  padding-left: 30px;
+  padding-right: 30px;
   background-color: #4d3f5c;
   -webkit-box-shadow: 10px 10px 32px 3px rgba(0, 0, 0, 0.21);
   -moz-box-shadow: 10px 10px 32px 3px rgba(0, 0, 0, 0.21);
   box-shadow: 10px 10px 32px 3px rgba(0, 0, 0, 0.21);
-  margin: 10px;
+  margin: 5px;
   border: 1px solid !important;
   border-color: #604979 !important;
 }
@@ -51,7 +54,11 @@ button.button {
   transition: all 0.2s;
   height: 55px;
   width: 255px;
-  margin: 10px;
+  margin: 0;
+}
+
+button.button.bordered {
+  border-color: #CEC9D4;
 }
 
 button.button.hoverable:hover {
@@ -63,6 +70,22 @@ button.button.hoverable:hover {
     display: block;
     margin: 0.2em auto;
   }
+}
+
+.button.top-button {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.button.center-button {
+  margin-top: 1px;
+  margin-bottom: 1px;
+  border-radius: 0;
+}
+
+.button.bottom-button {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
 }
 
 .delay-button {

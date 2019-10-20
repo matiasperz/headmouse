@@ -28,7 +28,7 @@ class app {
         }
     }
 
-    send = (e) => {
+    send = e => {
         e.preventDefault();
         this.SerialPort.write(this.inputMessage.value);
     }   
