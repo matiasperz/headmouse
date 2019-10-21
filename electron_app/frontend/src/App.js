@@ -1,10 +1,10 @@
 import React from 'react';
 
-import Slider from './Slider/containers/Slider';
+import Layout from './Layout/containers/Layout';
 
-const App = () => {
+const App = _ => {
   return (
-    <Slider/>
+    <Layout />
   );
 }
 
