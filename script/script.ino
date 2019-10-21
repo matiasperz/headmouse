@@ -155,7 +155,6 @@ void mouseLeftClick() {
     Mouse.click(MOUSE_LEFT);
   } else {
     Mouse.release(MOUSE_LEFT);
-    Mouse.click(MOUSE_LEFT);
   }
 }
 
@@ -215,6 +214,7 @@ void makeModuleAction(){
 void radioButtons(){
   if (radio.available()) {
     radio.read(&RadioPackage, sizeof(RadioPackage));
+    Serial.println(RadioPackage.action);
     evaluatePackageClick();
   }
 }
