@@ -10,9 +10,9 @@ int lastChangeRight = 0;  // Change in IR level
 int changeThreshold = 5; // How hard a rising edge do we need?
  
 //visualization
-int primaryClickDuration = 100;        // Length of visualization
+int primaryClickDuration = 100;
 int secondaryClickDuration = 500;
-float lastStartRight = 0;       // Last start of visualization
+float lastStartRight = 0;
 float lastStartLeft = 0;
 
 void setup() {

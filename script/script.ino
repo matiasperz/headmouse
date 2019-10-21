@@ -219,21 +219,12 @@ void radioButtons(){
   }
 }
 
-void printValues(int _leftSensorValue, int _rightSensorValue){
-  Serial.print("Left");
-  Serial.println(_leftSensorValue);  // Read Data
-  Serial.print("Right");
-  Serial.println(_rightSensorValue);  // Read Data  
-}
-
 void infraGlasses(){
   currentMillis = millis();
   
   if((currentMillis - infraGlassLastReading) >= infraGlassReadingThreshold){
     int rightSensorValue = analogRead(rightSensorPin); //1020
     int leftSensorValue = analogRead(leftSensorPin); //1020
-  
-    printValues(leftSensorValue, rightSensorValue);
   
     // look for rising edges
     lastChangeLeft = leftSensorValue - lastLevelLeft; //1020
