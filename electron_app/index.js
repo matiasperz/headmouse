@@ -18,10 +18,10 @@ createWindow = _ => {
   })
 
   // and load the localhost:3000 or a static file
-  win.loadURL('http://localhost:3000');
+  win.loadFile('./frontend/build/index.html');
 
   // Open the DevTools.
-  //win.webContents.openDevTools()
+  win.webContents.openDevTools()
 
   // Emitted when the window is closed.
   win.on('closed', _ => {

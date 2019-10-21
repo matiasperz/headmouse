@@ -6,6 +6,8 @@ import Header from '../components/Header';
 import { CircleSlider } from 'react-circle-slider';
 import Switch from 'react-switch';
 
+import serialport from '../../utils/serialport';
+
 class Layout extends Component {
     constructor(props) {
         super(props);
@@ -40,12 +42,38 @@ class Layout extends Component {
     }
 
     shouldComponentUpdate = (nextProps, nextState) => {
-        if (
-            nextState.sensibility !== this.state.sensibility ||
-            nextState.delay !== this.state.delay ||
-            nextState.inverted !== this.state.inverted ||
-            nextState.click !== this.state.click
-        ) return true;
+        if (nextState.sensibility !== this.state.sensibility) {
+            serialport.send({
+                type: 'SENS',
+                payload: nextState.sensibility
+            });
+            return true;
+        }
+
+        if (nextState.delay !== this.state.delay) {
+            serialport.send({
+                type: 'CLICK_DELAY',
+                payload: nextState.delay
+            });
+            return true;
+        }
+
+        if (nextState.inverted !== this.state.inverted) {
+            serialport.send({
+                type: 'INVERTED',
+                payload: nextState.inverted
+            });
+            return true;
+        }
+
+        if (nextState.click !== this.state.click) {
+            serialport.send({
+                type: 'MODULE',
+                payload: nextState.click
+            });
+            return true;   
+        }
+
         return false;
     }
 

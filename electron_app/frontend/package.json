@@ -7,7 +7,8 @@
     "react-circle-slider": "^1.6.2",
     "react-dom": "^16.10.2",
     "react-scripts": "3.2.0",
-    "react-switch": "^5.0.1"
+    "react-switch": "^5.0.1",
+    "serialport": "^7.1.5"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -29,5 +30,6 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  }
+  },
+  "devDependencies": {}
 }
