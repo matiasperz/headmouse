@@ -1,4 +1,4 @@
-const serialport = require('serialport');
+import serialport from 'serialport';
 
 class app {
     constructor() {
@@ -13,7 +13,9 @@ class app {
     findArduinoPort = async () => {
         try {
             const availablePorts = await serialport.list();
-            const MY_ARDUINO = availablePorts.filter(port => port.manufacturer.match(/Arduino LLC/))[0];
+            const MY_ARDUINO = availablePorts.filter(port => {
+                return port.manufacturer && port.manufacturer.includes("Arduino");
+            })[0];
 
             if (!MY_ARDUINO) {
                 throw new Error("Arduino not found");
@@ -24,12 +26,13 @@ class app {
             console.log(error);
         }
     }
-
+    
     send = ({ type, payload }) => {
-        this.SerialPort.write({
+        const json = {
             type: type,
             payload: payload
-        });
+        }
+        this.SerialPort.write(JSON.stringify(json));
     }
 }
 
