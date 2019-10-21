@@ -18,7 +18,7 @@ createWindow = _ => {
   })
 
   // and load the localhost:3000 or a static file
-  win.loadFile('./frontend/build/index.html');
+  win.loadURL('http://localhost:3000/');
 
   // Open the DevTools.
   win.webContents.openDevTools()
