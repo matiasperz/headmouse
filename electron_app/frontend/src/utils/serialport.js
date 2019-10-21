@@ -6,8 +6,12 @@ class app {
     }
 
     establishArduinoComunication = async () => {
-        this.ARDUINO_ADRESS = await this.findArduinoPort();
-        this.SerialPort = new serialport(this.ARDUINO_ADRESS, { baudRate: 9600 });
+        try {
+            this.ARDUINO_ADRESS = await this.findArduinoPort();
+            this.SerialPort = new serialport(this.ARDUINO_ADRESS, { baudRate: 9600 });
+        } catch (error) {
+            console.log(error);
+        }
     }
 
     findArduinoPort = async () => {
@@ -23,7 +27,7 @@ class app {
 
             return MY_ARDUINO.comName;
         } catch (error) {
-            console.log(error);
+            throw error;
         }
     }
     
