@@ -7,12 +7,12 @@ int lastLevelLeft = 0;
 int lastLevelRight = 0;    // Previous IR level
 int lastChangeLeft = 0;
 int lastChangeRight = 0;  // Change in IR level
-int changeThreshold = 6; // How hard a rising edge do we need?
+int changeThreshold = 5; // How hard a rising edge do we need?
  
 //visualization
-int primaryClickDuration = 100;        // Length of visualization
+int primaryClickDuration = 100;
 int secondaryClickDuration = 500;
-float lastStartRight = 0;       // Last start of visualization
+float lastStartRight = 0;
 float lastStartLeft = 0;
 
 void setup() {
@@ -49,8 +49,7 @@ void evaluateClick(){
   
   if (lastChangeRight <= -changeThreshold) {
     lastStartRight = _currentMillis;
-  }
-  if (lastChangeRight >= changeThreshold) {
+  }else if (lastChangeRight >= changeThreshold) {
     int _millisDiff = _currentMillis - lastStartRight;
 
     if(_millisDiff >= secondaryClickDuration){
@@ -69,8 +68,7 @@ void evaluateClick(){
 
   if (lastChangeLeft <= -changeThreshold) {
     lastStartLeft = _currentMillis;
-  }
-  if (lastChangeLeft >= changeThreshold) {
+  } else if (lastChangeLeft >= changeThreshold) {
     int _millisDiff = _currentMillis - lastStartLeft;
 
     if(_millisDiff >= secondaryClickDuration){
