@@ -12,7 +12,5 @@
     "electron": "^6.0.11",
     "electron-rebuild": "^1.8.6"
   },
-  "dependencies": {
-    "serialport": "^7.1.5"
-  }
+  "dependencies": {}
 }
