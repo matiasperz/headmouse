@@ -58,11 +58,11 @@ button.button {
 }
 
 button.button.bordered {
-  border-color: #CEC9D4;
+  border-color: #cec9d4;
 }
 
 button.button.hoverable:hover {
-  border-color: #CEC9D4;
+  border-color: #cec9d4;
 }
 
 @media all and (max-width: 30em) {
@@ -122,6 +122,10 @@ button.button.hoverable:hover {
   flex: 1;
 }
 
+.select {
+  width: 100px !important;
+}
+
 h1 {
   color: #f9f5ff;
   font-size: 35px !important;
@@ -133,4 +137,9 @@ h2 {
   font-size: 18px !important;
   font-weight: 400;
   margin-top: 0;
+}
+
+hr {
+  margin-right: 20px;
+  margin-left: 20px;
 }
