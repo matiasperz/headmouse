@@ -8,8 +8,10 @@ createWindow = _ => {
   // Create the browser window.
   win = new BrowserWindow({
     width: 800,
-    height: 600,
-    frame: false,
+    height: 670,
+    frame: true,
+    autoHideMenuBar: true,
+    title: "Headmouse Configuration",
     backgroundColor: '#635175',
     alwaysOnTop: false,
     webPreferences: {
@@ -18,7 +20,7 @@ createWindow = _ => {
   })
 
   // and load the localhost:3000 or a static file
-  win.loadFile('./frontend/build/index.html');
+  win.loadURL('http://localhost:3000/');
 
   // Open the DevTools.
   win.webContents.openDevTools()

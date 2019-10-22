@@ -5,6 +5,7 @@ import Header from '../components/Header';
 
 import { CircleSlider } from 'react-circle-slider';
 import Switch from 'react-switch';
+import Select from 'react-select';
 
 import serialport from '../../utils/serialport';
 
@@ -13,15 +14,15 @@ class Layout extends Component {
         super(props);
         this.state = {
             click: 'autoclick',
-            // sensibility: 0,
+            sensibility: 0,
             delay: 0,
             inverted: false
         };
     }
 
-    // handleSensibilityChange = newSensibility => {
-    //     this.setState({ sensibility: newSensibility });
-    // };
+    handleSensibilityChange = newSensibility => {
+        this.setState({ sensibility: newSensibility });
+    };
 
     handleClickChange = clickType => {
         this.setState({ click: clickType });
@@ -71,7 +72,7 @@ class Layout extends Component {
                 type: 'MODULE',
                 payload: nextState.click
             });
-            return true;   
+            return true;
         }
 
         return false;
@@ -103,9 +104,7 @@ class Layout extends Component {
                         </button>
                     </div>
                 </Section>
-                <Section
-                    disabled={this.state.click === 'autoclick' ? true : false}
-                >
+                <Section>
                     <Header
                         title={'Invert click'}
                         description={'Change click actions'}
@@ -120,6 +119,29 @@ class Layout extends Component {
                         height={50}
                         width={100}
                     />
+                    <hr />
+                    <div className="column">
+                        <Header
+                            title={'Sensibility'}
+                            description={null}
+                        />
+                        <Select
+                            className="switch font-montserrat select"
+                            isSearchable={true}
+                            value={this.state.sensibility}
+                            onChange={this.handleSensibilityChange}
+                            placeholder={this.state.sensibility.toString()}
+                            options={
+                                [
+                                    { value: 0, label: '0' },
+                                    { value: 1, label: '1' },
+                                    { value: 2, label: '2' },
+                                    { value: 3, label: '3' },
+                                    { value: 4, label: '4' }
+                                ]
+                            }
+                        />
+                    </div>
                 </Section>
                 <Section
                     disabled={this.state.click === 'autoclick' ? false : true}
