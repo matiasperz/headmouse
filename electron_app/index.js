@@ -8,10 +8,10 @@ createWindow = _ => {
   // Create the browser window.
   win = new BrowserWindow({
     width: 800,
-    height: 650,
+    height: 670,
     frame: true,
     autoHideMenuBar: true,
-    title: "HeadMouse Configuration",
+    title: "Headmouse Configuration",
     backgroundColor: '#635175',
     alwaysOnTop: false,
     webPreferences: {
