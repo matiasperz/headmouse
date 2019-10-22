@@ -13,9 +13,11 @@ boolean LOG_VALUES = false; //<-- For logging reading values
 boolean OPEN_KEYBOARD = false;  //<-- Config for oppening the on screan keyboard when connection
 boolean TOGGLE_LEFT_CLICK = true; //<-- For canceling the LEFT_CLICK action;
 boolean TOGGLE_RIGHT_CLICK = true;  //<-- For canceling the RIGHT_CLICK action;
+boolean CLICK_INVERT = false;
 char *MODULE = "RADIO_BUTTONS"; //<-- For canceling the AUTO_CLICK action;
 int MOUSE_SENSIBILITY = 200;
 int CLICK_DELAY = 1;
+
 
 
 //VARIABLES
@@ -329,5 +331,17 @@ void readIncomingJson(){ //<-- Interpretates the JSON string
 void configOptions(char *type, char *payload){ //<-- This has all the logic of each config
   if(strcmp(type, "SENS") == 0){
     MOUSE_SENSIBILITY = atoi(payload);
+  }else if(strcmp(type, "CLICK_DELAY") == 0){
+    CLICK_DELAY = atoi(payload);
+  }else if(strcmp(type, "MODULE") == 0){
+    MODULE = payload;
+  }else if(strcmp(type, "DISCOVER") == 0){
+    //discover function
+  }else if(strcmp(type, "CLICK_INVERT") == 0){
+    if(strcmp(payload, "true") == 0){
+      CLICK_INVERT = true;
+    }else if(strcmp(payload, "false") == 0){
+      
+    }
   }
 }
