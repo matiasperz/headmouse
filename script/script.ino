@@ -29,7 +29,7 @@ typedef struct { //<-- Package to be transmited by radio structure
 radioPackage RadioPackage;  //<-- Struct type / Variable name
 int16_t ax, ay, az, gx, gy, gz; //<-- MPU-6050 variables
 int vx, vy, previous_vx, previous_vy; //<-- Variables to move the cursor (vx, vy) and to compare movement (previous_vx, previous_vy)
-int delayClickCount = 0;
+int lastClickMillis = 0;
 int currentMillis = 0;
 byte address[6] = "00001";  //<-- Radio NRF24L01 Address
 
@@ -271,7 +271,16 @@ void infraGlasses(){
 
 void autoClick() { //TODO: This has to be improved
     // This conditional verifies that the mouse is not moving (20x20 maximum)
-    if ( (previous_vx - 10) <= vx && vx <= previous_vx + 10 && (previous_vy - 10) <= vy && vy <= previous_vy + 10) {
+    currentMillis = millis();
+
+    if(CLICK_DELAY > 0 && CLICK_DELAY <= 4){
+      if((currentMillis - lastClickMillis) >= (CLICK_DELAY * 1000)){
+        mouseLeftClick();
+        lastClickMillis = currentMillis;
+      }
+    }
+    
+    /*if ( (previous_vx - 10) <= vx && vx <= previous_vx + 10 && (previous_vy - 10) <= vy && vy <= previous_vy + 10) {
       delayClickCount++;
       if (CLICK_DELAY == 1 && delayClickCount == 25) { //<-- The click will occur after 2 seconds in which the mouse is in the same place
         mouseLeftClick();
@@ -289,7 +298,7 @@ void autoClick() { //TODO: This has to be improved
       
       previous_vy = vy;
       delayClickCount = 0;
-    }
+    }*/
 }
 
 static int jsoneq(const char *json, jsmntok_t *tok, const char *s) {

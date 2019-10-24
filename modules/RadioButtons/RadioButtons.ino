@@ -67,7 +67,7 @@ void loop() {
     emmitEventPackage();
   }
 
-  delay(20);
+  delay(100);
 }
 
 void printValues() {
