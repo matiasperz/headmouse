@@ -1,5 +1,6 @@
-//#include <Wire.h>
+#include <Wire.h>
 #include <I2Cdev.h> //<-- Library required by MPU-6050
+#include <string.h>
 #include <MPU6050.h> //<-- MPU-6050 library
 #include <Keyboard.h> //<-- Keyboard library
 #include <Mouse.h> //<-- Mouse library
@@ -14,10 +15,9 @@ boolean OPEN_KEYBOARD = false;  //<-- Config for oppening the on screan keyboard
 boolean TOGGLE_LEFT_CLICK = true; //<-- For canceling the LEFT_CLICK action;
 boolean TOGGLE_RIGHT_CLICK = true;  //<-- For canceling the RIGHT_CLICK action;
 boolean CLICK_INVERT = false;
-char *MODULE = "RADIO_BUTTONS"; //<-- For canceling the AUTO_CLICK action;
-int MOUSE_SENSIBILITY = 200;
+char MODULE[13];
+int MOUSE_SENSIBILITY = 0;
 int CLICK_DELAY = 1;
-
 
 
 //VARIABLES
@@ -41,8 +41,8 @@ jsmntok_t jsmn_token_array[10]; // We expect no more than 10 tokens
 
 char const *JSON_STRING;
 String RECEIVED_STRING;
-char JSON_KEY[13];
-char JSON_VALUE[13];
+char JSON_KEY[20];
+char JSON_VALUE[20];
 
 
 /* INFRA_GLASSES VARIABLES */
@@ -72,7 +72,7 @@ RF24 radio(9, 10);
 
 void setup() {
   Serial.begin(9600); //<-- Serial monitor begin
-
+  strcpy(MODULE, "RADIO_BUTTONS");
   //NRF24L01 Alimentation 3.3v pin config
   pinMode(A0, OUTPUT); //<-- Define the pin output
   digitalWrite(A0, HIGH);  //<-- Flow voltaje through pin
@@ -83,7 +83,7 @@ void setup() {
   radio.setPALevel(RF24_PA_MIN);
   radio.startListening();
   Serial.println("Radio started listening");
-
+  
   //KEYBOARD
   Keyboard.begin();
   delay(1000);
@@ -97,7 +97,6 @@ void setup() {
   }
 
   //JSMN
-  jsmn_init(&jsmn_parser_instance); // Initializing JSMN
   
   printConfig();  //<-- Print current configuration
 }
@@ -114,8 +113,8 @@ void loop() {
       This values are going to be asigned to the position of the mouse
       <vx> and <vy> are divided for the MOUSE_SENSIBILITY in order to CANCEL the parkinson
   */
-  vx = (gx + 200) / MOUSE_SENSIBILITY;  //<--  200 is the value that allows <vx> to get close to the absolute cero of the x axis
-  vy = - (gz + 60) / MOUSE_SENSIBILITY;  //<--  60 is the value that allows <vx> to get close to the absolute cero of the z axis
+  vx = (gx + 200) / ( 200 + 400 - (100 * MOUSE_SENSIBILITY));  //<--  200 is the value that allows <vx> to get close to the absolute cero of the x axis
+  vy = - (gz + 60) / ( 200 + 400 - (100 * MOUSE_SENSIBILITY));  //<--  60 is the value that allows <vx> to get close to the absolute cero of the z axis
 
   Mouse.move(vx, vy);
 
@@ -302,46 +301,53 @@ static int jsoneq(const char *json, jsmntok_t *tok, const char *s) {
 }
 
 void readIncomingJson(){ //<-- Interpretates the JSON string
+  jsmn_init(&jsmn_parser_instance); // Initializing JSMN
   RECEIVED_STRING = Serial.readString(); //Reading the whole serial available string
   JSON_STRING = RECEIVED_STRING.c_str(); //Removing the internal char array for manipulation
+  response = jsmn_parse(&jsmn_parser_instance, JSON_STRING, strlen(JSON_STRING), jsmn_token_array, sizeof(jsmn_token_array) / sizeof(jsmn_token_array[0]));
   
-  response = jsmn_parse(&jsmn_parser_instance, JSON_STRING, strlen(JSON_STRING), jsmn_token_array, sizeof(jsmn_token_array) / sizeof(jsmn_token_array[0])); //
-
   if (response < 0) {
     Serial.print("Failed to parse JSON\n");
   }
 
   if (response < 1 || jsmn_token_array[0].type != JSMN_OBJECT) {
     Serial.print("Object expected\n");
-    Serial.print(RECEIVED_STRING);
+    Serial.println(JSON_STRING);
   }
 
   for (i = 1; i < response; i++) {
     if (jsoneq(JSON_STRING, &jsmn_token_array[i], "type") == 0) {
-      strncpy(JSON_KEY, JSON_STRING + jsmn_token_array[i + 1].start, (jsmn_token_array[i + 1].end - jsmn_token_array[i + 1].start));
+      strcpy(JSON_KEY, RECEIVED_STRING.substring(jsmn_token_array[i + 1].start, jsmn_token_array[i + 1].end).c_str());
     } else if (jsoneq(JSON_STRING, &jsmn_token_array[i], "payload") == 0) {
-      strncpy(JSON_VALUE, JSON_STRING + jsmn_token_array[i + 1].start, (jsmn_token_array[i + 1].end - jsmn_token_array[i + 1].start));
-      configOptions(JSON_KEY, JSON_VALUE);
+      strcpy(JSON_VALUE, RECEIVED_STRING.substring(jsmn_token_array[i + 1].start, jsmn_token_array[i + 1].end).c_str());
+      configOptions();
     }
 
     i++;
   }
 }
 
-void configOptions(char *type, char *payload){ //<-- This has all the logic of each config
-  if(strcmp(type, "SENS") == 0){
-    MOUSE_SENSIBILITY = atoi(payload);
-  }else if(strcmp(type, "CLICK_DELAY") == 0){
-    CLICK_DELAY = atoi(payload);
-  }else if(strcmp(type, "MODULE") == 0){
-    MODULE = payload;
-  }else if(strcmp(type, "DISCOVER") == 0){
+void configOptions(){ //<-- This has all the logic of each config
+  if(strcmp(JSON_KEY, "SENS") == 0){
+    Serial.println("Entre a sensivility");
+    MOUSE_SENSIBILITY = atoi(JSON_VALUE);
+    Serial.println(MOUSE_SENSIBILITY);
+  }else if(strcmp(JSON_KEY, "CLICK_DELAY") == 0){
+    Serial.println("Click delay");
+    CLICK_DELAY = atoi(JSON_VALUE);
+    Serial.println(CLICK_DELAY);
+  }else if(strcmp(JSON_KEY, "MODULE") == 0){
+    Serial.println("Entre a module");
+    strcpy(MODULE, JSON_VALUE);
+  }else if(strcmp(JSON_KEY, "DISCOVER") == 0){
+    Serial.println("Entre a discover");
     //discover function
-  }else if(strcmp(type, "CLICK_INVERT") == 0){
-    if(strcmp(payload, "true") == 0){
+  }else if(strcmp(JSON_KEY, "CLICK_INVERT") == 0){
+    Serial.println("Entre a click invert");
+    if(strcmp(JSON_VALUE, "true") == 0){
       CLICK_INVERT = true;
-    }else if(strcmp(payload, "false") == 0){
-      
+    }else if(strcmp(JSON_VALUE, "false") == 0){
+      CLICK_INVERT = false;
     }
   }
 }

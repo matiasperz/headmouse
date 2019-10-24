@@ -13,15 +13,15 @@ class Layout extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            click: 'autoclick',
+            click: 'AUTO_CLICK',
             sensibility: 0,
             delay: 0,
             inverted: false
         };
     }
 
-    handleSensibilityChange = newSensibility => {
-        this.setState({ sensibility: newSensibility });
+    handleSensibilityChange = ({ value }) => {
+        this.setState({ sensibility: value });
     };
 
     handleClickChange = clickType => {
@@ -37,9 +37,7 @@ class Layout extends Component {
     }
 
     componentDidUpdate = _ => {
-        console.log(`Inverted click: ${this.state.inverted}`);
-        console.log(`Delay: ${this.state.delay}`);
-        console.log(`Click type: ${this.state.click}`);
+        
     }
 
     shouldComponentUpdate = (nextProps, nextState) => {
@@ -61,7 +59,7 @@ class Layout extends Component {
 
         if (nextState.inverted !== this.state.inverted) {
             serialport.send({
-                type: 'INVERTED',
+                type: 'CLICK_INVERT',
                 payload: nextState.inverted
             });
             return true;
@@ -88,18 +86,18 @@ class Layout extends Component {
                     />
                     <div className="switch">
                         <button
-                            onClick={_ => this.handleClickChange('autoclick')}
-                            className={`button hoverable top-button ${this.state.click === 'autoclick' ? 'bordered' : null}`}>
+                            onClick={_ => this.handleClickChange('AUTO_CLICK')}
+                            className={`button hoverable top-button ${this.state.click === 'AUTO_CLICK' ? 'bordered' : null}`}>
                             Autoclick
                         </button>
                         <button
-                            onClick={_ => this.handleClickChange('buttons')}
-                            className={`button hoverable center-button ${this.state.click === 'buttons' ? 'bordered' : null}`}>
+                            onClick={_ => this.handleClickChange('RADIO_BUTTONS')}
+                            className={`button hoverable center-button ${this.state.click === 'RADIO_BUTTONS' ? 'bordered' : null}`}>
                             Buttons
                         </button>
                         <button
-                            onClick={_ => this.handleClickChange('glasses')}
-                            className={`button hoverable bottom-button ${this.state.click === 'glasses' ? 'bordered' : null}`}>
+                            onClick={_ => this.handleClickChange('INFRA_GLASSES')}
+                            className={`button hoverable bottom-button ${this.state.click === 'INFRA_GLASSES' ? 'bordered' : null}`}>
                             Glasses
                         </button>
                     </div>
@@ -110,7 +108,7 @@ class Layout extends Component {
                         description={'Change click actions'}
                     />
                     <Switch
-                        disabled={this.state.click === 'autoclick' ? true : false}
+                        disabled={this.state.click === 'AUTO_CLICK' ? true : false}
                         className="switch"
                         onColor='#CE9FFC'
                         offColor='#7367f0'
@@ -144,22 +142,22 @@ class Layout extends Component {
                     </div>
                 </Section>
                 <Section
-                    disabled={this.state.click === 'autoclick' ? false : true}
+                    disabled={this.state.click === 'AUTO_CLICK' ? false : true}
                 >
                     <Header
                         title={'Delay'}
                         description={'Select the click delay on auto-click mode'}
                     />
                     <button
-                        disabled={this.state.click === 'autoclick' ? false : true}
+                        disabled={this.state.click === 'AUTO_CLICK' ? false : true}
                         onClick={_ => {
                             if (this.state.delay + 1 < 5) return this.handleDelayChange(this.state.delay + 1)
                         }}
-                        className={`button delay-button ${this.state.click !== 'autoclick' ? null : 'hoverable'}`}>
+                        className={`button delay-button ${this.state.click !== 'AUTO_CLICK' ? null : 'hoverable'}`}>
                         +
                     </button>
                     <CircleSlider
-                        disabled={this.state.click === 'autoclick' ? false : true}
+                        disabled={this.state.click === 'AUTO_CLICK' ? false : true}
                         value={this.state.delay}
                         max={4}
                         knobRadius={12}
@@ -172,11 +170,11 @@ class Layout extends Component {
                         onChange={this.handleDelayChange}
                     />
                     <button
-                        disabled={this.state.click === 'autoclick' ? false : true}
+                        disabled={this.state.click === 'AUTO_CLICK' ? false : true}
                         onClick={_ => {
                             if (this.state.delay - 1 > -1) return this.handleDelayChange(this.state.delay - 1)
                         }}
-                        className={`button delay-button ${this.state.click !== 'autoclick' ? null : 'hoverable'}`}>
+                        className={`button delay-button ${this.state.click !== 'AUTO_CLICK' ? null : 'hoverable'}`}>
                         -
                     </button>
                 </Section>

@@ -1,4 +1,5 @@
 import serialport from 'serialport';
+const Readline = require('@serialport/parser-readline')
 
 class app {
     constructor() {
@@ -8,7 +9,13 @@ class app {
     establishArduinoComunication = async () => {
         try {
             this.ARDUINO_ADRESS = await this.findArduinoPort();
+            console.log(this.ARDUINO_ADRESS);
             this.SerialPort = new serialport(this.ARDUINO_ADRESS, { baudRate: 9600 });
+            
+            const parser = new Readline();
+            this.SerialPort.pipe(parser);
+
+            parser.on('data', line => console.log(`> ${line}`));
         } catch (error) {
             console.log(error);
         }
@@ -36,6 +43,7 @@ class app {
             type: type,
             payload: payload
         }
+        console.log(json);
         this.SerialPort.write(JSON.stringify(json));
     }
 }
