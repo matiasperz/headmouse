@@ -46,8 +46,8 @@ char JSON_VALUE[20];
 
 
 /* INFRA_GLASSES VARIABLES */
-int rightSensorPin  = A2;
-int leftSensorPin = A3;    // IR Sensor
+int rightSensorPin  = A1;
+int leftSensorPin = A2;    // IR Sensor
 
 int lastLevelLeft = 0;
 int lastLevelRight = 0;    // Previous IR level
