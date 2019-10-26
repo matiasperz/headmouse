@@ -1,7 +1,5 @@
 import React from 'react';
 
-import './styles/Styles.css';
-
 const Header = props => {
     return (
         <div className="column">

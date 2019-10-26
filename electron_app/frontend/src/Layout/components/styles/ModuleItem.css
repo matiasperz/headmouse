@@ -1,0 +1,25 @@
+.container{
+    text-align: center;
+    color: #4E4E4E;
+}
+
+.container .img-container{
+    cursor: pointer;
+    width: 120px;
+    height: 120px;
+    background-color: #4E4E4E;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.container.active {
+    color: white;
+}
+
+.container.active .img-container{
+    background-color: #4E4E4E;
+    background-color: white;
+    box-shadow: 0px 0px 6px rgba(255, 255, 255, 60%);
+}

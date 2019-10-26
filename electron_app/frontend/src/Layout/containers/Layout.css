@@ -1,39 +1,22 @@
-.font-montserrat {
-  font-family: Montserrat;
-}
-
 .layout {
-  display: flex;
   flex-wrap: wrap;
   flex-direction: column;
   align-content: center;
   justify-content: center;
   flex: 1;
+  font-family: 'Roobert';
+  padding: 35px 48px;
 }
 
-.section {
+.layout .title{
+  font-size: 38px;
+  font-weight: bold;
+  margin-top: 0px;
+}
+
+.modules-container{
   display: flex;
-  flex-direction: row;
-  border-radius: 8px;
-  padding-top: 10px;
-  padding-bottom: 10px;
-  padding-left: 30px;
-  padding-right: 30px;
-  background-color: #4d3f5c;
-  -webkit-box-shadow: 10px 10px 32px 3px rgba(0, 0, 0, 0.21);
-  -moz-box-shadow: 10px 10px 32px 3px rgba(0, 0, 0, 0.21);
-  box-shadow: 10px 10px 32px 3px rgba(0, 0, 0, 0.21);
-  margin: 5px;
-  border: 1px solid !important;
-  border-color: #604979 !important;
-}
-
-.section.hoverable:hover {
-  border-color: #8d6caf !important;
-}
-
-.section.transparent {
-  opacity: 0.4;
+  justify-content: space-between;
 }
 
 button.button {
@@ -117,9 +100,7 @@ button.button.hoverable:hover {
 }
 
 .switch {
-  align-self: center;
-  justify-self: center;
-  flex: 1;
+  justify-self: flex-end;
 }
 
 .select {

@@ -7,12 +7,13 @@ let win
 createWindow = _ => {
   // Create the browser window.
   win = new BrowserWindow({
-    width: 800,
-    height: 670,
+    width: 510,
+    height: 850,
     frame: true,
     autoHideMenuBar: true,
+    resizable: true,
     title: "Headmouse Configuration",
-    backgroundColor: '#635175',
+    backgroundColor: '#373737',
     alwaysOnTop: false,
     webPreferences: {
       nodeIntegration: true

@@ -3,12 +3,12 @@ const Readline = require('@serialport/parser-readline')
 
 class app {
     constructor() {
-        this.establishArduinoComunication();
+        this._establishArduinoComunication();
     }
 
-    establishArduinoComunication = async () => {
+    _establishArduinoComunication = async () => {
         try {
-            this.ARDUINO_ADRESS = await this.findArduinoPort();
+            this.ARDUINO_ADRESS = await this._findArduinoPort();
             console.log(this.ARDUINO_ADRESS);
             this.SerialPort = new serialport(this.ARDUINO_ADRESS, { baudRate: 9600 });
             
@@ -17,11 +17,11 @@ class app {
 
             parser.on('data', line => console.log(`> ${line}`));
         } catch (error) {
-            console.log(error);
+            this.errorPrinter(error.message);
         }
     }
 
-    findArduinoPort = async () => {
+    _findArduinoPort = async () => {
         try {
             const availablePorts = await serialport.list();
             const MY_ARDUINO = availablePorts.filter(port => {
@@ -29,7 +29,7 @@ class app {
             })[0];
 
             if (!MY_ARDUINO) {
-                throw new Error("Arduino not found");
+                throw new Error("El HeadMouse no esta conectado");
             }
 
             return MY_ARDUINO.comName;
@@ -38,13 +38,22 @@ class app {
         }
     }
     
+    bindErrorPrinter(errorPrinter){
+        this.errorPrinter = errorPrinter;
+    }
+
     send = ({ type, payload }) => {
         const json = {
             type: type,
             payload: payload
         }
         console.log(json);
-        this.SerialPort.write(JSON.stringify(json));
+        
+        try {
+            this.SerialPort.write(JSON.stringify(json));
+        } catch (error) {
+            this.errorPrinter("Conecte el HeadMouse para configurar");
+        }    
     }
 }
 

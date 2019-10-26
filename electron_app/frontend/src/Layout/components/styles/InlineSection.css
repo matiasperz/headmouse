@@ -1,0 +1,19 @@
+.inline-section{
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.inline-section .title{
+    font-weight: bold;
+    font-size: 28px !important;
+    margin: 0px;
+}
+
+.inline-section.hoverable:hover {
+    border-color: #8d6caf !important;
+}
+
+.inline-section.transparent {
+    opacity: 0.4;
+}
