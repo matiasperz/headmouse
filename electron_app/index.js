@@ -1,11 +1,13 @@
 const { app, BrowserWindow, ipcMain: ipc } = require('electron');
 const path = require('path');
 
-let win;
-let bubble;
+const HeadMouseSerial = require('./utils/HeadMouseSerial');
+
+let configWin;
+let bubbleWin;
 
 createWindow = _ => {
-  win = new BrowserWindow({
+  configWin = new BrowserWindow({
     width: 510,
     height: 850,
     frame: true,
@@ -20,19 +22,20 @@ createWindow = _ => {
     }
   });
 
-  win.loadURL('http://localhost:3000/');
+  configWin.loadURL('http://localhost:3000/');
 
-  win.webContents.openDevTools();
+  configWin.webContents.openDevTools();
 
-  win.on('closed', _ => {
-    win = null
+  configWin.on('close', _ => {
+    HeadMouseSerial.unsubscribeUpdater(winUpdateHandler(configWin));
+    configWin = null
   });
 }
 
 createBubble = () => {
-  bubble = new BrowserWindow({
-    width: 172, //150
-    height: 172, //150
+  bubbleWin = new BrowserWindow({
+    width: 172, //172
+    height: 172, //172
     transparent: true,
     frame: false,
     resizable: false,
@@ -42,22 +45,31 @@ createBubble = () => {
       nodeIntegration: true,
       preload: path.resolve('./utils/bubble/preload.js')
     },
-    x: -88,
-    y: -100
+    x: -88, //-88
+    y: -100 //-100
   });
 
-  bubble.loadFile('./frontend/src/screens/Bubble/bubble.html');
+  bubbleWin.loadFile('./frontend/src/screens/Bubble/bubble.html');
 
-  // bubble.webContents.openDevTools();
+  // bubbleWin.webContents.openDevTools();
 
-  bubble.on('closed', _ => {
-    bubble = null
+  bubbleWin.on('closed', _ => {
+    bubbleWin = null
   });
 }
 
+winUpdateHandler = (win)=>{
+  return (type, message) => {
+    setTimeout(() => {
+      win.webContents.send(type, message);
+    }, 500);
+  }
+};
+
 app.on('ready', () => {
   createBubble();
-  
+  HeadMouseSerial.subscribeUpdater(winUpdateHandler(bubbleWin));
+  HeadMouseSerial.establishArduinoComunication();
 });
 
 app.on('window-all-closed', _ => {
@@ -68,15 +80,20 @@ app.on('window-all-closed', _ => {
 });
 
 app.on('activate', _ => {
-  if (bubble === null) {
+  if (bubbleWin === null) {
     createBubble();
   }
 })
 
 ipc.on('open-settings', () => {
-  if(win){
+  if(configWin){
     return
   }
-
   createWindow();
+  HeadMouseSerial.subscribeUpdater(winUpdateHandler(configWin));
+  HeadMouseSerial.establishArduinoComunication();
+});
+
+ipc.on('send', (event, jsonMessage) => {
+  HeadMouseSerial.send(jsonMessage);
 });

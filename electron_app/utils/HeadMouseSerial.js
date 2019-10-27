@@ -1,23 +1,37 @@
-import serialport from 'serialport';
+const serialport = require('serialport');
 const Readline = require('@serialport/parser-readline')
 
-class app {
-    constructor() {
-        this._establishArduinoComunication();
+class HeadMouseSerial {
+    constructor(){
+        this.updateHandlers = [];
     }
 
-    _establishArduinoComunication = async () => {
+    updateHandler(type, message){
+        this.updateHandlers.map((hander) => {
+            hander(type, message);
+        });
+    }
+
+    establishArduinoComunication = async () => {
         try {
+            if(this.SerialPort){
+                if(this.SerialPort.isOpen){
+                    this.SerialPort.close();
+                    this.SerialPort = undefined;
+                }else{
+                    this.SerialPort = undefined;
+                }
+            }
             this.ARDUINO_ADRESS = await this._findArduinoPort();
-            console.log(this.ARDUINO_ADRESS);
             this.SerialPort = new serialport(this.ARDUINO_ADRESS, { baudRate: 9600 });
-            
+
             const parser = new Readline();
             this.SerialPort.pipe(parser);
 
             this._bindEvents(parser);
+            this.updateHandler("connected", null);
         } catch (error) {
-            this.errorPrinter(error.message);
+            this.updateHandler("error", error.message);
         }
     }
 
@@ -45,25 +59,29 @@ class app {
                 
                 switch(jsonEvent.type){
                     case 'ERROR':
-                        this.errorPrinter(jsonEvent.payload);
+                        this.updateHandler("error", jsonEvent.payload);
                     break;
 
                     case 'MESSAGE':
-                        this.infoPrinter(jsonEvent.payload)
+                        this.updateHandler("info", jsonEvent.payload);
                     break;
                 }
             }catch(error){
-                this.errorPrinter(error.message);
+                this.updateHandler("error", error.message);
             }
         });
     }
 
-    bindErrorPrinter(errorPrinter){
-        this.errorPrinter = errorPrinter;
+    subscribeUpdater(updateHandler){
+        this.updateHandlers.push(updateHandler);
     }
 
-    bindInfoPrinter(infoPrinter){
-        this.infoPrinter = infoPrinter;
+    unsubscribeUpdater(updateHander) {
+        const index = this.updateHandlers.findIndex(handler => {
+            return handler === updateHander
+        })
+
+        this.updateHandlers.splice(index, 1);
     }
 
     send = ({ type, payload }) => {
@@ -75,9 +93,9 @@ class app {
         try {
             this.SerialPort.write(JSON.stringify(json));
         } catch (error) {
-            this.errorPrinter("Conecte el HeadMouse para configurar");
-        }    
+            this.updateHandler("error" ,"Conecte el HeadMouse para configurar");
+        }
     }
 }
 
-export default new app();
+module.exports = (new HeadMouseSerial());

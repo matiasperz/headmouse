@@ -14,8 +14,6 @@ import anteojosImage from '../../../assets/images/Anteojos.png';
 import automaticImage from '../../../assets/images/A.png';
 import buttonsImage from '../../../assets/images/Buttons.png';
 
-import serialport from '../../../utils/serialport';
-
 import './Layout.css'
 
 class Layout extends Component {
@@ -45,8 +43,14 @@ class Layout extends Component {
     }
 
     componentDidMount(){
-        serialport.bindErrorPrinter(this.errorPrinter);
-        serialport.bindInfoPrinter(this.infoPrinter);
+        const ipc = window.ipc;
+
+        ipc.on('error', (event, message) => {
+            this.errorPrinter(message);
+        });
+        ipc.on('info', (event, message) => {
+            this.infoPrinter(message);
+        });
     }
 
     handleSensibilityChange = value => {
@@ -72,8 +76,10 @@ class Layout extends Component {
     }
 
     shouldComponentUpdate = (nextProps, nextState) => {
+        const ipc = window.ipc;
+
         if (nextState.sensibility !== this.state.sensibility) {
-            serialport.send({
+            ipc.send('send', {
                 type: 'SENS',
                 payload: nextState.sensibility
             });
@@ -81,7 +87,7 @@ class Layout extends Component {
         }
 
         if (nextState.delay !== this.state.delay) {
-            serialport.send({
+            ipc.send('send', {
                 type: 'CLICK_DELAY',
                 payload: nextState.delay
             });
@@ -89,7 +95,7 @@ class Layout extends Component {
         }
 
         if (nextState.inverted !== this.state.inverted) {
-            serialport.send({
+            ipc.send('send', {
                 type: 'CLICK_INVERT',
                 payload: nextState.inverted
             });
@@ -97,7 +103,7 @@ class Layout extends Component {
         }
 
         if (nextState.openKeyboard !== this.state.openKeyboard) {
-            serialport.send({
+            ipc.send('send', {
                 type: 'OPEN_KEYBOARD',
                 payload: nextState.openKeyboard
             });
@@ -105,7 +111,7 @@ class Layout extends Component {
         }
 
         if (nextState.click !== this.state.click) {
-            serialport.send({
+            ipc.send('send', {
                 type: 'MODULE',
                 payload: nextState.click
             });

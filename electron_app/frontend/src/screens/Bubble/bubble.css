@@ -25,6 +25,18 @@ body{
     transform: rotate(90deg);
 }
 
+.container.error{
+    background-color: #d83232;
+}
+
+.container.error .grid-4 #mouse{
+    display: none;
+}
+
+.container.error .grid-4 #error{
+    display: block;
+}
+
 .grid-1 {
     grid-column-start: 1;
     grid-column-end: 3;
@@ -82,5 +94,12 @@ body{
 #mouse{
     margin-top: 22px;
     margin-left: 15px;
+    -webkit-user-drag: none;
+}
+
+#error{
+    display: none;
+    margin-top: 27px;
+    margin-left: 17px;
     -webkit-user-drag: none;
 }
