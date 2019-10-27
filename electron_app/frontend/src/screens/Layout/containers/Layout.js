@@ -19,15 +19,24 @@ import './Layout.css'
 class Layout extends Component {
     constructor(props) {
         super(props);
+        window.ipc.on('app-init', (event, settings) => {
+            this.setState({
+                ...settings,
+                error: null,
+                info: null,
+                shouldSendToMain: false
+            });
+        });
         window.ipc.on('app-close', () => window.ipc.send('config', this.state));
         this.state = {
             error: null,
             info: null,
-            click: 'AUTO_CLICK',
+            click: '',
             sensibility: 0,
             delay: 0,
             inverted: false,
-            openKeyboard: false
+            openKeyboard: false,
+            shouldSendToMain: false
         };
     }
 
@@ -43,7 +52,7 @@ class Layout extends Component {
         });
     }
 
-    componentDidMount(){
+    componentDidMount() {
         const ipc = window.ipc;
 
         ipc.on('error', (event, message) => {
@@ -56,28 +65,30 @@ class Layout extends Component {
 
     handleSensibilityChange = value => {
         console.log(value);
-        this.setState({ sensibility: value });
+        this.setState({ sensibility: value, shouldSendToMain: true });
     };
 
     handleClickChange = clickType => {
-        this.setState({ click: clickType });
+        this.setState({ click: clickType, shouldSendToMain: true });
     }
 
     handleDelayChange = ({ value }) => {
         console.log(value);
-        this.setState({ delay: value });
+        this.setState({ delay: value, shouldSendToMain: true });
     }
 
     handleInverterChange = checked => {
-        this.setState({ inverted: checked });
+        this.setState({ inverted: checked, shouldSendToMain: true });
     }
 
     handleOpenKeyboardChange = checked => {
-        this.setState({ openKeyboard: checked });
+        this.setState({ openKeyboard: checked, shouldSendToMain: true });
     }
 
     shouldComponentUpdate = (nextProps, nextState) => {
         const ipc = window.ipc;
+
+        if (!this.state.shouldSendToMain) return true;    //<--If this is false, we do not send the config to the main process
 
         if (nextState.sensibility !== this.state.sensibility) {
             ipc.send('send', {
@@ -123,7 +134,7 @@ class Layout extends Component {
             return true;
         }
 
-        if (nextState.info !== this.state.info){
+        if (nextState.info !== this.state.info) {
             return true;
         }
 
