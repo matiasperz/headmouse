@@ -4,6 +4,7 @@ import Section from '../components/Section';
 import InlineSection from '../components/InlineSection';
 import Modal from './Modal';
 import ErrorModal from '../components/ErrorModal';
+import InfoModal from '../components/InfoModal';
 import ModuleItem from '../components/ModuleItem';
 import { CircleSlider } from 'react-circle-slider';
 import Switch from 'react-switch';
@@ -23,6 +24,7 @@ class Layout extends Component {
         window.ipc.on('app-close', () => window.ipc.send('config', this.state));
         this.state = {
             error: null,
+            info: null,
             click: 'AUTO_CLICK',
             sensibility: 0,
             delay: 0,
@@ -37,8 +39,15 @@ class Layout extends Component {
         });
     }
 
-    componentDidMount() {
+    infoPrinter = value => {
+        this.setState({
+            info: value
+        });
+    }
+
+    componentDidMount(){
         serialport.bindErrorPrinter(this.errorPrinter);
+        serialport.bindInfoPrinter(this.infoPrinter);
     }
 
     handleSensibilityChange = value => {
@@ -105,6 +114,10 @@ class Layout extends Component {
         }
 
         if (nextState.error !== this.state.error) {
+            return true;
+        }
+
+        if (nextState.info !== this.state.info){
             return true;
         }
 
@@ -223,6 +236,9 @@ class Layout extends Component {
                 </Section>
                 <Modal isActive={this.state.error != null}>
                     <ErrorModal errorPrinter={this.errorPrinter} message={this.state.error} />
+                </Modal>
+                <Modal isActive={this.state.info != null}>
+                    <InfoModal infoPrinter={this.infoPrinter} message={this.state.info} />
                 </Modal>
             </div>
         );
