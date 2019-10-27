@@ -1,15 +1,36 @@
-.bold{
-    font-weight: bold;
+.bold {
+  font-weight: bold;
 }
 
-.flex{
-    display: flex;
+.flex {
+  display: flex;
 }
 
-.flex.h-centered{
-    justify-content: center;
+.flex.h-centered {
+  justify-content: center;
 }
 
-body{
-    margin: 0px;
+body {
+  margin: 0px;
+}
+
+@font-face {
+  font-family: 'Roobert';
+  src: url("./assets/fonts/RoobertRegular.ttf") format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Roobert';
+  src: url("./assets/fonts/RoobertMedium.ttf") format('truetype');
+  font-weight: medium;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Roobert';
+  src: url("./assets/fonts/RoobertBold.ttf") format('truetype');
+  font-weight: bold;
+  font-style: normal;
 }

@@ -1,41 +1,41 @@
-.error-container{
-    display: flex;
-    flex-direction: column;
-    background-color: #F04747;
-    width: 394px;
-    height: 216px;
-    border-radius: 20px;
+.error-container {
+  display: flex;
+  flex-direction: column;
+  background-color: #f04747;
+  width: 394px;
+  height: 216px;
+  border-radius: 20px;
 }
 
-.error-header{
-    text-align: center;
+.error-header {
+  text-align: center;
 }
 
-.error-header h2{
-    margin: 10px 0px;
-    font-size: 20px !important;
-    font-family: 'Roobert';
-    font-weight: bold;   
+.error-header h2 {
+  margin: 10px 0px;
+  font-size: 20px !important;
+  font-family: "Roobert";
+  font-weight: bold;
 }
 
-.error-content{
-    font-family: 'Roobert';
-    color: white;
-    position: relative;
-    flex: 1;
+.error-content {
+  font-family: "Roobert";
+  color: white;
+  position: relative;
+  flex: 1;
 }
 
-.error-content h3{
-    position: absolute;
-    text-align: center;
-    right: 0;
-    left: 0;
-    top: calc( (172px / 2) - 44px );
+.error-content h3 {
+  position: absolute;
+  text-align: center;
+  right: 0;
+  left: 0;
+  top: calc((172px / 2) - 44px);
 }
 
-.close{
-    position: absolute;
-    right: 17px;
-    top: 14px;
-    cursor: pointer;
+.close {
+  position: absolute;
+  right: 17px;
+  top: 14px;
+  cursor: pointer;
 }

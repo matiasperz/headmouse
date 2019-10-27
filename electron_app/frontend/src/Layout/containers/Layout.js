@@ -9,11 +9,11 @@ import { CircleSlider } from 'react-circle-slider';
 import Switch from 'react-switch';
 import Select from 'react-select';
 
-import anteojosImage from '../../../assets/images/Anteojos.png';
-import automaticImage from '../../../assets/images/A.png';
-import buttonsImage from '../../../assets/images/Buttons.png';
+import anteojosImage from '../../assets/images/Anteojos.png';
+import automaticImage from '../../assets/images/A.png';
+import buttonsImage from '../../assets/images/Buttons.png';
 
-import serialport from '../../../utils/serialport';
+import serialport from '../../utils/serialport';
 
 import './Layout.css'
 
@@ -52,7 +52,7 @@ class Layout extends Component {
     handleDelayChange = ({ value }) => {
         console.log(value);
         this.setState({ delay: value });
-    }
+    };
 
     handleInverterChange = checked => {
         this.setState({ inverted: checked });
