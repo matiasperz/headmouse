@@ -1,4 +1,4 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, ipcMain: ipc } = require('electron');
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -12,7 +12,7 @@ createWindow = _ => {
     height: 850,
     frame: true,
     autoHideMenuBar: true,
-    resizable: true,
+    resizable: false,
     title: "Headmouse Configuration",
     backgroundColor: '#373737',
     alwaysOnTop: false,
@@ -25,7 +25,7 @@ createWindow = _ => {
   win.loadURL('http://localhost:3000/');
 
   // Open the DevTools.
-  win.webContents.openDevTools();
+  // win.webContents.openDevTools();
 
   // Emitted when the window is closed.
   win.on('closed', _ => {
@@ -38,15 +38,16 @@ createWindow = _ => {
 
 createBubble = () => {
   bubble = new BrowserWindow({
-    width: 150, //190
-    height: 150, //190
+    width: 150, //150
+    height: 150, //150
     transparent: true,
     frame: false,
     resizable: false,
     alwaysOnTop: true,
     autoHideMenuBar: true,
     webPreferences: {
-      nodeIntegration: true
+      nodeIntegration: true,
+      preload: 'T:/Desktop/Practicas/Headmouse/electron_app/utils/bubble/preload.js'
     },
     x: -78,
     y: -90
@@ -67,7 +68,6 @@ createBubble = () => {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.on('ready', createWindow);
 app.on('ready', createBubble);
 
 // Quit when all windows are closed.
@@ -85,10 +85,16 @@ app.on('activate', _ => {
   if (bubble === null) {
     createBubble();
   }
-  if (win === null) {
-    createWindow();
-  }
 })
+
+ipc.on('open-settings', () => {
+  if(win){
+    return
+  }
+  
+  console.log('VENTANA ABIERTA!');
+  createWindow();
+});
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
