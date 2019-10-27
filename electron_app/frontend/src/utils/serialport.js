@@ -15,7 +15,7 @@ class app {
             const parser = new Readline();
             this.SerialPort.pipe(parser);
 
-            parser.on('data', line => console.log(`> ${line}`));
+            this._bindEvents(parser);
         } catch (error) {
             this.errorPrinter(error.message);
         }
@@ -37,9 +37,33 @@ class app {
             throw error;
         }
     }
-    
+
+    _bindEvents(_parser){
+        _parser.on('data', line => {
+            try{
+                const jsonEvent = JSON.parse(line);
+                
+                switch(jsonEvent.type){
+                    case 'ERROR':
+                        this.errorPrinter(jsonEvent.payload);
+                    break;
+
+                    case 'MESSAGE':
+                        this.infoPrinter(jsonEvent.payload)
+                    break;
+                }
+            }catch(error){
+                this.errorPrinter(error.message);
+            }
+        });
+    }
+
     bindErrorPrinter(errorPrinter){
         this.errorPrinter = errorPrinter;
+    }
+
+    bindInfoPrinter(infoPrinter){
+        this.infoPrinter = infoPrinter;
     }
 
     send = ({ type, payload }) => {
@@ -47,7 +71,6 @@ class app {
             type: type,
             payload: payload
         }
-        console.log(json);
         
         try {
             this.SerialPort.write(JSON.stringify(json));

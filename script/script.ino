@@ -17,7 +17,7 @@ boolean TOGGLE_RIGHT_CLICK = true;  //<-- For canceling the RIGHT_CLICK action;
 boolean CLICK_INVERT = false;
 char MODULE[13];
 int MOUSE_SENSIBILITY = 0;
-int CLICK_DELAY = 1;
+int CLICK_DELAY = 2;
 
 
 //VARIABLES
@@ -150,6 +150,14 @@ void openScreenKeyboard() {
   }
 }
 
+void sendSerialPacket(char *_type, char *_payload){
+  Serial.print("{\"type\": \"");
+  Serial.print(_type);
+  Serial.print("\", \"payload\": \"");
+  Serial.print(_payload);
+  Serial.println("\"}");
+}
+
 //Mouse clicks
 void mouseLeftClick() {
   if (!Mouse.isPressed(MOUSE_LEFT)) {
@@ -157,6 +165,7 @@ void mouseLeftClick() {
   } else {
     Mouse.release(MOUSE_LEFT);
   }
+  sendSerialPacket("ACTION", "LEFT_CLICK");
 }
 
 void mouseRightClick() {
@@ -166,6 +175,7 @@ void mouseRightClick() {
     Mouse.release(MOUSE_RIGHT);
     Mouse.click(MOUSE_RIGHT);
   }
+  sendSerialPacket("ACTION", "RIGHT_CLICK");
 }
 
 void mouseDoubleClick(){
@@ -179,6 +189,7 @@ void mouseDoubleClick(){
     delay(20);
     Mouse.click(MOUSE_LEFT);
   }
+  sendSerialPacket("ACTION", "DOUBLE_CLICK");
 }
 
 void mouseSelectionClick() {
@@ -188,6 +199,7 @@ void mouseSelectionClick() {
     Mouse.release(MOUSE_LEFT);
     Mouse.press(MOUSE_LEFT);
   }
+  sendSerialPacket("ACTION", "SELECTION");
 }
 
 void evaluatePackageClick(){
@@ -215,7 +227,7 @@ void makeModuleAction(){
 void radioButtons(){
   if (radio.available()) {
     radio.read(&RadioPackage, sizeof(RadioPackage));
-    Serial.println(RadioPackage.action);
+    sendSerialPacket("MESSAGE", RadioPackage.action);
     evaluatePackageClick();
   }
 }
@@ -316,12 +328,11 @@ void readIncomingJson(){ //<-- Interpretates the JSON string
   response = jsmn_parse(&jsmn_parser_instance, JSON_STRING, strlen(JSON_STRING), jsmn_token_array, sizeof(jsmn_token_array) / sizeof(jsmn_token_array[0]));
   
   if (response < 0) {
-    Serial.print("Failed to parse JSON\n");
+    sendSerialPacket("ERROR", "Failed to parse JSON");
   }
 
   if (response < 1 || jsmn_token_array[0].type != JSMN_OBJECT) {
-    Serial.print("Object expected\n");
-    Serial.println(JSON_STRING);
+    sendSerialPacket("ERROR", "Object expected");
   }
 
   for (i = 1; i < response; i++) {
@@ -338,21 +349,21 @@ void readIncomingJson(){ //<-- Interpretates the JSON string
 
 void configOptions(){ //<-- This has all the logic of each config
   if(strcmp(JSON_KEY, "SENS") == 0){
-    Serial.println("Entre a sensivility");
+    sendSerialPacket("MESSAGE", "Entre a sensivility");
     MOUSE_SENSIBILITY = atoi(JSON_VALUE);
-    Serial.println(MOUSE_SENSIBILITY);
+    sendSerialPacket("MESSAGE", MOUSE_SENSIBILITY);
   }else if(strcmp(JSON_KEY, "CLICK_DELAY") == 0){
-    Serial.println("Click delay");
+    sendSerialPacket("MESSAGE", "Click delay");
     CLICK_DELAY = atoi(JSON_VALUE);
-    Serial.println(CLICK_DELAY);
+    sendSerialPacket("MESSAGE", CLICK_DELAY);
   }else if(strcmp(JSON_KEY, "MODULE") == 0){
-    Serial.println("Entre a module");
+    sendSerialPacket("MESSAGE", "Entre a module");
     strcpy(MODULE, JSON_VALUE);
   }else if(strcmp(JSON_KEY, "DISCOVER") == 0){
-    Serial.println("Entre a discover");
+    sendSerialPacket("MESSAGE", "Entre a discover");
     //discover function
   }else if(strcmp(JSON_KEY, "CLICK_INVERT") == 0){
-    Serial.println("Entre a click invert");
+    sendSerialPacket("MESSAGE", "Entre a click invert");
     if(strcmp(JSON_VALUE, "true") == 0){
       CLICK_INVERT = true;
     }else if(strcmp(JSON_VALUE, "false") == 0){
