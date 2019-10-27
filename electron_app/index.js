@@ -1,6 +1,6 @@
 const { app, BrowserWindow, ipcMain: ipc } = require('electron');
 const path = require('path');
-const configuration = require('./utils/config/config.js'); 
+const configuration = require('./utils/config/config.js');
 
 const HeadMouseSerial = require('./utils/HeadMouseSerial');
 
@@ -26,6 +26,10 @@ createWindow = _ => {
   configWin.loadURL('http://localhost:3000/');
 
   configWin.webContents.openDevTools();
+
+  configWin.webContents.once('dom-ready', () => {
+    configWin.webContents.send('app-init', configuration.readSettings());
+  });
 
   configWin.on('close', _ => {
     HeadMouseSerial.unsubscribeUpdater(winUpdateHandler(configWin));
@@ -63,7 +67,7 @@ createBubble = () => {
   });
 }
 
-winUpdateHandler = (win)=>{
+winUpdateHandler = (win) => {
   return (type, message) => {
     win.webContents.send(type, message);
   }
@@ -89,7 +93,7 @@ app.on('activate', _ => {
 })
 
 ipc.on('open-settings', () => {
-  if(configWin){
+  if (configWin) {
     return
   }
   createWindow();
