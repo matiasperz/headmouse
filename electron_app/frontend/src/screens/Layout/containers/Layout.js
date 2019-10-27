@@ -19,6 +19,7 @@ import './Layout.css'
 class Layout extends Component {
     constructor(props) {
         super(props);
+        window.ipc.on('app-close', () => window.ipc.send('config', this.state));
         this.state = {
             error: null,
             info: null,
@@ -118,7 +119,7 @@ class Layout extends Component {
             return true;
         }
 
-        if (nextState.error !== this.state.error){
+        if (nextState.error !== this.state.error) {
             return true;
         }
 
@@ -133,31 +134,31 @@ class Layout extends Component {
         return (
             <div className="layout">
                 <h1 className="title">
-                    Configuración: 
+                    Configuración:
                 </h1>
-                <Section title="Modulo">
+                <Section title="Módulo">
                     <div className="modules-container" >
                         <ModuleItem
                             image={buttonsImage}
-                            name="Botones" 
+                            name="Botones"
                             onClick={_ => this.handleClickChange('RADIO_BUTTONS')}
-                            active={ this.state.click === 'RADIO_BUTTONS' }
+                            active={this.state.click === 'RADIO_BUTTONS'}
                         />
-                        <ModuleItem 
-                            image={automaticImage} 
-                            name="Automatico" 
+                        <ModuleItem
+                            image={automaticImage}
+                            name="Automatico"
                             onClick={_ => this.handleClickChange('AUTO_CLICK')}
-                            active={ this.state.click === 'AUTO_CLICK' }
+                            active={this.state.click === 'AUTO_CLICK'}
                         />
-                        <ModuleItem 
-                            image={anteojosImage} 
-                            name="Anteojos" 
+                        <ModuleItem
+                            image={anteojosImage}
+                            name="Anteojos"
                             onClick={_ => this.handleClickChange('INFRA_GLASSES')}
-                            active={ this.state.click === 'INFRA_GLASSES' }
+                            active={this.state.click === 'INFRA_GLASSES'}
                         />
                     </div>
                 </Section>
-                <InlineSection disabled={ this.state.click === 'AUTO_CLICK' } title="Click invertido">
+                <InlineSection disabled={this.state.click === 'AUTO_CLICK'} title="Click invertido">
                     <Switch
                         disabled={this.state.click === 'AUTO_CLICK' ? true : false}
                         className="switch"
@@ -172,7 +173,7 @@ class Layout extends Component {
                     />
                 </InlineSection>
                 <InlineSection title="Abrir teclado">
-                    <Switch 
+                    <Switch
                         className="switch"
                         onColor='#44D949'
                         offColor='#E54343'
@@ -184,25 +185,25 @@ class Layout extends Component {
                         checkedIcon={false}
                     />
                 </InlineSection>
-                <InlineSection disabled={ this.state.click !== 'AUTO_CLICK' } title="Click delay">
+                <InlineSection disabled={this.state.click !== 'AUTO_CLICK'} title="Click delay">
                     <Select
-                        isDisabled = { this.state.click !== 'AUTO_CLICK' }
+                        isDisabled={this.state.click !== 'AUTO_CLICK'}
                         isSearchable={true}
                         value={this.state.delay}
                         onChange={this.handleDelayChange}
                         placeholder={`${this.state.delay.toString()} seg`}
                         styles={{
-                            container: (provided)=>({
+                            container: (provided) => ({
                                 ...provided,
                                 width: 130
                             }),
-                            control: (provided)=>({
+                            control: (provided) => ({
                                 ...provided,
                                 background: '#4B4B4B',
                                 border: 'none',
                                 color: 'white'
                             }),
-                            placeholder: (provided)=>({
+                            placeholder: (provided) => ({
                                 ...provided,
                                 color: 'white'
                             })
@@ -222,7 +223,7 @@ class Layout extends Component {
                     <div className="flex h-centered">
                         <CircleSlider
                             styles={{
-                                container: ()=>({
+                                container: () => ({
                                     background: 'red'
                                 })
                             }}

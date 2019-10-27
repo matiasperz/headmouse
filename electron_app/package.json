@@ -13,6 +13,7 @@
     "electron-rebuild": "^1.8.6"
   },
   "dependencies": {
-    "serialport": "^7.1.5"
+    "serialport": "^7.1.5",
+    "nconf": "^0.10.0"
   }
 }
