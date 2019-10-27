@@ -1,10 +1,15 @@
 const { app, BrowserWindow, ipcMain: ipc } = require('electron');
 const path = require('path');
+const configuration = require('./utils/config/config.js');
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let win;
 let bubble;
+
+ipc.on('config', (event, config) => {
+  configuration.saveSettings(null, config);
+});
 
 createWindow = _ => {
   // Create the browser window.
@@ -18,21 +23,22 @@ createWindow = _ => {
     backgroundColor: '#373737',
     alwaysOnTop: false,
     webPreferences: {
-      nodeIntegration: true
-    } 
+      nodeIntegration: true,
+      preload: path.resolve('./utils/settings/preload.js')
+    }
   });
 
   // and load the localhost:3000 or a static file
   win.loadURL('http://localhost:3000/');
 
   // Open the DevTools.
-  // win.webContents.openDevTools();
-
+  win.webContents.openDevTools();
   // Emitted when the window is closed.
-  win.on('closed', _ => {
-    // Dereference the window object, usually you would store windows
-    // in an array if your app supports multi windows, this is the time
-    // when you should delete the corresponding element.
+  win.on('close', _ => {  //<--Emitted when the window is going to be closed
+    win.webContents.send('app-close');
+  });
+
+  win.on('closed', _ => {  //<--Emitted when the window is already closed
     win = null
   });
 }
@@ -89,7 +95,7 @@ app.on('activate', _ => {
 })
 
 ipc.on('open-settings', () => {
-  if(win){
+  if (win) {
     return
   }
 

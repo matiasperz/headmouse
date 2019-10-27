@@ -677,7 +677,7 @@ module.exports = function(webpackEnv) {
     // our own hints via the FileSizeReporter
     performance: false,
     externals: {
-      serialport: `commonjs ${path.resolve(__dirname, '../node_modules/serialport')}`
+      serialport: `commonjs ${path.resolve(__dirname, '../node_modules/serialport/lib/index.js')}`
     }
   };
 };
