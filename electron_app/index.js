@@ -18,7 +18,8 @@ createWindow = _ => {
     backgroundColor: '#373737',
     alwaysOnTop: false,
     webPreferences: {
-      nodeIntegration: true
+      nodeIntegration: true,
+      preload: path.resolve('./utils/settings/preload.js')
     } 
   });
 
@@ -26,7 +27,7 @@ createWindow = _ => {
   win.loadURL('http://localhost:3000/');
 
   // Open the DevTools.
-  // win.webContents.openDevTools();
+  win.webContents.openDevTools();
 
   // Emitted when the window is closed.
   win.on('closed', _ => {
