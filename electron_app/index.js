@@ -4,8 +4,8 @@ const configuration = require('./utils/config/config.js');
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
-let win;
-let bubble;
+let configWin;
+let bubbleWin;
 
 ipc.on('config', (event, config) => {
   configuration.saveSettings(null, config);
@@ -13,7 +13,7 @@ ipc.on('config', (event, config) => {
 
 createWindow = _ => {
   // Create the browser window.
-  win = new BrowserWindow({
+  configWin = new BrowserWindow({
     width: 510,
     height: 850,
     frame: true,
@@ -29,22 +29,22 @@ createWindow = _ => {
   });
 
   // and load the localhost:3000 or a static file
-  win.loadURL('http://localhost:3000/');
+  configWin.loadURL('http://localhost:3000/');
 
   // Open the DevTools.
-  win.webContents.openDevTools();
+  configWin.webContents.openDevTools();
   // Emitted when the window is closed.
-  win.on('close', _ => {  //<--Emitted when the window is going to be closed
-    win.webContents.send('app-close');
+  configWin.on('close', _ => {  //<--Emitted when the window is going to be closed
+    configWin.webContents.send('app-close');
   });
 
-  win.on('closed', _ => {  //<--Emitted when the window is already closed
-    win = null
+  configWin.on('closed', _ => {  //<--Emitted when the window is already closed
+    configWin = null
   });
 }
 
 createBubble = () => {
-  bubble = new BrowserWindow({
+  bubbleWin = new BrowserWindow({
     width: 150, //150
     height: 150, //150
     transparent: true,
@@ -60,15 +60,15 @@ createBubble = () => {
     y: -90
   });
 
-  bubble.loadFile('./frontend/src/screens/Bubble/bubble.html');
+  bubbleWin.loadFile('./frontend/src/screens/Bubble/bubble.html');
 
   // bubble.webContents.openDevTools();
 
-  bubble.on('closed', _ => {
+  bubbleWin.on('closed', _ => {
     // Dereference the window object, usually you would store windows
     // in an array if your app supports multi windows, this is the time
     // when you should delete the corresponding element.
-    bubble = null
+    bubbleWin = null
   });
 }
 
@@ -89,13 +89,13 @@ app.on('window-all-closed', _ => {
 app.on('activate', _ => {
   // On macOS it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
-  if (bubble === null) {
+  if (bubbleWin === null) {
     createBubble();
   }
 })
 
 ipc.on('open-settings', () => {
-  if (win) {
+  if (configWin) {
     return
   }
 
