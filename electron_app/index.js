@@ -1,4 +1,5 @@
 const { app, BrowserWindow, ipcMain: ipc } = require('electron');
+const path = require('path');
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -47,7 +48,7 @@ createBubble = () => {
     autoHideMenuBar: true,
     webPreferences: {
       nodeIntegration: true,
-      preload: 'T:/Desktop/Practicas/Headmouse/electron_app/utils/bubble/preload.js'
+      preload: path.resolve('./utils/bubble/preload.js')
     },
     x: -78,
     y: -90
@@ -91,8 +92,7 @@ ipc.on('open-settings', () => {
   if(win){
     return
   }
-  
-  console.log('VENTANA ABIERTA!');
+
   createWindow();
 });
 
