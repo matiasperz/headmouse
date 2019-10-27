@@ -1,5 +1,6 @@
 const { app, BrowserWindow, ipcMain: ipc } = require('electron');
 const path = require('path');
+const configuration = require('./utils/config/config.js'); 
 
 const HeadMouseSerial = require('./utils/HeadMouseSerial');
 
@@ -28,7 +29,11 @@ createWindow = _ => {
 
   configWin.on('close', _ => {
     HeadMouseSerial.unsubscribeUpdater(winUpdateHandler(configWin));
-    configWin = null
+    configWin.webContents.send('app-close');
+  });
+
+  configWin.on('closed', () => {
+    configWin = null;
   });
 }
 
@@ -96,4 +101,8 @@ ipc.on('open-settings', () => {
 
 ipc.on('send', (event, jsonMessage) => {
   HeadMouseSerial.send(jsonMessage);
+});
+
+ipc.on('config', (event, config) => {
+  configuration.saveSettings(null, config);
 });
