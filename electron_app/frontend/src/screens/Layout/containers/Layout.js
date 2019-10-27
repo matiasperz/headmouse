@@ -30,7 +30,7 @@ class Layout extends Component {
         };
     }
 
-    errorPrinter = (value) => {
+    errorPrinter = value => {
         this.setState({
             error: value
         });
@@ -40,7 +40,7 @@ class Layout extends Component {
         serialport.bindErrorPrinter(this.errorPrinter);
     }
 
-    handleSensibilityChange = (value) => {
+    handleSensibilityChange = value => {
         console.log(value);
         this.setState({ sensibility: value });
     };
@@ -114,7 +114,7 @@ class Layout extends Component {
         return (
             <div className="layout">
                 <h1 className="title">
-                    Configuracion: 
+                    Configuración: 
                 </h1>
                 <Section title="Modulo">
                     <div className="modules-container" >
