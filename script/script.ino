@@ -17,7 +17,7 @@ boolean TOGGLE_RIGHT_CLICK = true;  //<-- For canceling the RIGHT_CLICK action;
 boolean CLICK_INVERT = false;
 char MODULE[13];
 int MOUSE_SENSIBILITY = 0;
-int CLICK_DELAY = 2;
+int CLICK_DELAY = 0;
 
 
 //VARIABLES
@@ -37,7 +37,8 @@ byte address[6] = "00001";  //<-- Radio NRF24L01 Address
 int i;
 int response;
 jsmn_parser jsmn_parser_instance; // 
-jsmntok_t jsmn_token_array[10]; // We expect no more than 10 tokens
+jsmntok_t jsmn_token_array[60]; // We expect no more than 60 tokens
+boolean initialConfigReceived = false;
 
 char const *JSON_STRING;
 String RECEIVED_STRING;
@@ -72,7 +73,12 @@ RF24 radio(9, 10);
 
 void setup() {
   Serial.begin(9600); //<-- Serial monitor begin
-  strcpy(MODULE, "RADIO_BUTTONS");
+  while(!initialConfigReceived){
+    if(Serial.available()){
+      readIncomingJson();
+    }
+  }
+  initialConfigReceived = true;
   //NRF24L01 Alimentation 3.3v pin config
   pinMode(A0, OUTPUT); //<-- Define the pin output
   digitalWrite(A0, HIGH);  //<-- Flow voltaje through pin
@@ -82,7 +88,6 @@ void setup() {
   radio.openReadingPipe(0, address);
   radio.setPALevel(RF24_PA_MIN);
   radio.startListening();
-  Serial.println("Radio started listening");
   
   //KEYBOARD
   Keyboard.begin();
@@ -98,7 +103,7 @@ void setup() {
 
   //JSMN
   
-  printConfig();  //<-- Print current configuration
+  // printConfig();  //<-- Print current configuration
 }
 
 
@@ -127,14 +132,29 @@ void loop() {
 
 void printConfig() {
   Serial.println("CONFIGURATION:");
-  Serial.println("LOG_VALUES: " + LOG_VALUES);
-  Serial.println("OPEN_KEYBOARD: " + OPEN_KEYBOARD);
   
   Serial.print("MODULE: ");
   Serial.println(MODULE);
   
-  Serial.println("MOUSE_SENSIBILITY: " + MOUSE_SENSIBILITY);
-  Serial.println("CLICK_DELAY: " + CLICK_DELAY);
+  Serial.print("SENSIBILITY: ");
+  Serial.println(MOUSE_SENSIBILITY);
+
+  Serial.print("OPEN_KEYBOARD: ");
+  if(OPEN_KEYBOARD){
+    Serial.println("true");
+  }else{
+    Serial.println("false");
+  }
+
+  Serial.print("INVERT CLICK: ");
+  if(CLICK_INVERT){
+    Serial.println("true");
+  }else{
+    Serial.println("false");
+  }
+
+  Serial.print("CLICK_DELAY: ");
+  Serial.println(CLICK_DELAY);
 }
 
 void openScreenKeyboard() {
@@ -338,35 +358,74 @@ void readIncomingJson(){ //<-- Interpretates the JSON string
     if (jsoneq(JSON_STRING, &jsmn_token_array[i], "type") == 0) {
       strcpy(JSON_KEY, RECEIVED_STRING.substring(jsmn_token_array[i + 1].start, jsmn_token_array[i + 1].end).c_str());
     } else if (jsoneq(JSON_STRING, &jsmn_token_array[i], "payload") == 0) {
-      strcpy(JSON_VALUE, RECEIVED_STRING.substring(jsmn_token_array[i + 1].start, jsmn_token_array[i + 1].end).c_str());
-      configOptions();
+      Serial.println("PASE POR ACA");
+      if(strcmp(JSON_KEY, "INITIAL_CONFIG") == 0 && !initialConfigReceived){
+        int j;
+        if (jsmn_token_array[i + 1].type != JSMN_ARRAY) {
+          continue; /* We expect groups to be an array of strings */
+        }
+        
+        for (j = 0; j < jsmn_token_array[i + 1].size; j++) {
+          int r;
+          jsmntok_t *arrayObjectItem = &jsmn_token_array[i + j + 2]; //<-- Object item inside Array
+          if (arrayObjectItem -> type != JSMN_OBJECT) {
+            continue;
+          }
+
+          for (r = 0; r < (arrayObjectItem -> size + 4); r++) {
+            if (jsoneq(JSON_STRING, &jsmn_token_array[i + j + r + 2], "type") == 0) {
+              strcpy(JSON_KEY, RECEIVED_STRING.substring(jsmn_token_array[i + j + r + 2 + 1].start, jsmn_token_array[i + j + r + 2 + 1].end).c_str());
+            } else if (jsoneq(JSON_STRING, &jsmn_token_array[i + j + r + 2], "payload") == 0) {
+              strcpy(JSON_VALUE, RECEIVED_STRING.substring(jsmn_token_array[i + j + r + 2 + 1].start, jsmn_token_array[i + j + r + 2 + 1].end).c_str());
+              configOptions();
+            }
+          }
+          
+          // i += jsmn_token_array[i + j + 2].size + 1;
+        }
+      }else if(strcmp(JSON_KEY, "INITIAL_CONFIG") != 0){
+        strcpy(JSON_VALUE, RECEIVED_STRING.substring(jsmn_token_array[i + 1].start, jsmn_token_array[i + 1].end).c_str());
+        configOptions();
+      }
     }
 
-    i++;
+    i++; //<-- We add 1 because we already readed a value from a key
   }
 }
 
 void configOptions(){ //<-- This has all the logic of each config
+  Serial.print(JSON_KEY);
+  Serial.print(": ");
+  Serial.println(JSON_VALUE);
+
   if(strcmp(JSON_KEY, "SENS") == 0){
-    sendSerialPacket("MESSAGE", "Entre a sensivility");
+    // sendSerialPacket("MESSAGE", "Entre a sensivility");
     MOUSE_SENSIBILITY = atoi(JSON_VALUE);
-    sendSerialPacket("MESSAGE", MOUSE_SENSIBILITY);
+    // Serial.println(MOUSE_SENSIBILITY);
   }else if(strcmp(JSON_KEY, "CLICK_DELAY") == 0){
-    sendSerialPacket("MESSAGE", "Click delay");
+    // sendSerialPacket("MESSAGE", "Click delay");
+    Serial.print('ME LLEGO EL CLICK_DELAY COMO: ');
+    Serial.println(JSON_VALUE);
     CLICK_DELAY = atoi(JSON_VALUE);
-    sendSerialPacket("MESSAGE", CLICK_DELAY);
   }else if(strcmp(JSON_KEY, "MODULE") == 0){
-    sendSerialPacket("MESSAGE", "Entre a module");
+    // sendSerialPacket("MESSAGE", "Entre a module");
     strcpy(MODULE, JSON_VALUE);
   }else if(strcmp(JSON_KEY, "DISCOVER") == 0){
-    sendSerialPacket("MESSAGE", "Entre a discover");
+    // sendSerialPacket("MESSAGE", "Entre a discover");
     //discover function
   }else if(strcmp(JSON_KEY, "CLICK_INVERT") == 0){
-    sendSerialPacket("MESSAGE", "Entre a click invert");
+    // sendSerialPacket("MESSAGE", "Entre a click invert");
     if(strcmp(JSON_VALUE, "true") == 0){
       CLICK_INVERT = true;
     }else if(strcmp(JSON_VALUE, "false") == 0){
       CLICK_INVERT = false;
+    }
+  }else if(strcmp(JSON_KEY, "OPEN_KEYBOARD") == 0){
+    // sendSerialPacket("MESSAGE", "Entre a keyboard");
+    if(strcmp(JSON_VALUE, "true") == 0){
+      OPEN_KEYBOARD = true;
+    }else if(strcmp(JSON_VALUE, "false") == 0){
+      OPEN_KEYBOARD = false;
     }
   }
 }

@@ -31,9 +31,7 @@ class HeadMouseSerial {
             this._bindEvents(parser);
             this.updateHandler("connected", null);
         } catch (error) {
-            setTimeout(() => {
-                this.updateHandler("error", error.message);
-            }, 500);
+            this.updateHandler("error", error.message);
         }
     }
 
@@ -56,28 +54,30 @@ class HeadMouseSerial {
 
     _bindEvents(_parser){
         _parser.on('data', line => {
+            console.log(line);
             try{
                 const jsonEvent = JSON.parse(line);
                 
                 switch(jsonEvent.type){
                     case 'ERROR':
-                        setTimeout(() => {
-                            this.updateHandler("error", jsonEvent.payload);
-                        }, 500);
+                        this.updateHandler("error", jsonEvent.payload);
                     break;
 
                     case 'MESSAGE':
                         this.updateHandler("info", jsonEvent.payload);
+                        console.log(`> ${jsonEvent.payload}`);
                     break;
 
                     case 'ACTION':
                         this.updateHandler("action", jsonEvent.payload);
                     break;
+
+                    default:
+                        console.log(`> ${jsonEvent.payload}`);
+                    break;
                 }
             }catch(error){
-                setTimeout(() => {
-                    this.updateHandler("error", error.message);
-                }, 500);
+                // this.updateHandler("error", error.message);
             }
         });
     }
@@ -92,6 +92,43 @@ class HeadMouseSerial {
         })
 
         this.updateHandlers.splice(index, 1);
+    }
+
+    sendInitialConfig = ({ click, sensibility, delay, inverted, openKeyboard }) => {
+        const json = {
+            type: "INITIAL_CONFIG",
+            payload: [
+                {
+                    type: "MODULE",
+                    payload: click
+                },
+                {
+                    type: "SENS",
+                    payload: sensibility
+                },
+                {
+                    type: "CLICK_DELAY",
+                    payload: delay
+                },
+                {
+                    type: "CLICK_INVERT",
+                    payload: inverted
+                },
+                {
+                    type: "OPEN_KEYBOARD",
+                    payload: openKeyboard
+                }
+            ]
+        }
+
+        try{
+            setTimeout(() => {
+                console.log(JSON.stringify(json));
+                this.SerialPort.write(JSON.stringify(json));
+            }, 4000);
+        }catch(error){
+            this.updateHandler("error" ,"Conecte el HeadMouse para configurar");
+        }
     }
 
     send = ({ type, payload }) => {

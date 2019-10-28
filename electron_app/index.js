@@ -25,10 +25,12 @@ createWindow = _ => {
 
   configWin.loadURL('http://localhost:3000/');
 
-  configWin.webContents.openDevTools();
+  // configWin.webContents.openDevTools();
 
   configWin.webContents.once('dom-ready', () => {
     configWin.webContents.send('app-init', configuration.readSettings());
+    HeadMouseSerial.establishArduinoComunication();
+    HeadMouseSerial.sendInitialConfig(configuration.readSettings());
   });
 
   configWin.on('close', _ => {
@@ -62,6 +64,11 @@ createBubble = () => {
 
   // bubbleWin.webContents.openDevTools();
 
+  bubbleWin.webContents.once('dom-ready', () => {
+    HeadMouseSerial.establishArduinoComunication();
+    HeadMouseSerial.sendInitialConfig(configuration.readSettings());
+  });
+
   bubbleWin.on('closed', _ => {
     bubbleWin = null
   });
@@ -76,11 +83,9 @@ winUpdateHandler = (win) => {
 app.on('ready', () => {
   createBubble();
   HeadMouseSerial.subscribeUpdater(winUpdateHandler(bubbleWin));
-  HeadMouseSerial.establishArduinoComunication();
 });
 
 app.on('window-all-closed', _ => {
-
   if (process.platform !== 'darwin') {
     app.quit();
   }
@@ -98,7 +103,6 @@ ipc.on('open-settings', () => {
   }
   createWindow();
   HeadMouseSerial.subscribeUpdater(winUpdateHandler(configWin));
-  HeadMouseSerial.establishArduinoComunication();
 });
 
 ipc.on('send', (event, jsonMessage) => {
