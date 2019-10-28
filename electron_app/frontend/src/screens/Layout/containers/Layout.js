@@ -27,7 +27,7 @@ class Layout extends Component {
                 shouldSendToMain: false
             });
         });
-        window.ipc.on('app-close', () => window.ipc.send('config', this.state));
+        window.ipc.on('app-close', () => window.ipc.send('config', { ...this.state, error: null, info: null }));
         this.state = {
             error: null,
             info: null,
@@ -202,7 +202,7 @@ class Layout extends Component {
                         isSearchable={true}
                         value={this.state.delay}
                         onChange={this.handleDelayChange}
-                        placeholder={`${this.state.delay.toString()} seg`}
+                        placeholder={`${(this.state.delay+1).toString()} seg`}
                         styles={{
                             container: (provided) => ({
                                 ...provided,
@@ -221,17 +221,22 @@ class Layout extends Component {
                         }}
                         options={
                             [
-                                { value: 0, label: '0' },
-                                { value: 1, label: '1' },
-                                { value: 2, label: '2' },
-                                { value: 3, label: '3' },
-                                { value: 4, label: '4' }
+                                { value: 0, label: '1' },
+                                { value: 1, label: '2' },
+                                { value: 2, label: '3' },
+                                { value: 3, label: '4' },
+                                { value: 4, label: '5' }
                             ]
                         }
                     />
                 </InlineSection>
                 <Section title="Sensibilidad" >
                     <div className="flex h-centered">
+                        <button
+                            onClick={_ => { this.state.sensibility + 1 < 5 && this.handleSensibilityChange(this.state.sensibility - 1) }}
+                            className={`button delay-button hoverable`}>
+                            -
+                        </button>
                         <CircleSlider
                             styles={{
                                 container: () => ({
@@ -249,6 +254,11 @@ class Layout extends Component {
                             gradientColorTo={'#7367f0'}
                             onChange={this.handleSensibilityChange}
                         />
+                        <button
+                            onClick={_ => { this.state.sensibility + 1 < 5 && this.handleSensibilityChange(this.state.sensibility + 1) }}
+                            className={`button delay-button hoverable`}>
+                            +
+                        </button>
                     </div>
                 </Section>
                 <Modal isActive={this.state.error != null}>
