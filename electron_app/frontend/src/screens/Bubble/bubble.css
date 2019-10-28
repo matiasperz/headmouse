@@ -37,6 +37,10 @@ body{
     display: block;
 }
 
+.container.active{
+    transform: scale(1.05);
+}
+
 .grid-1 {
     grid-column-start: 1;
     grid-column-end: 3;
@@ -85,15 +89,15 @@ body{
 }
 
 #gear{
-    margin-left: 18px;
-    margin-top: 27px;
+    margin-left: 29px;
+    margin-top: 32px;
     -webkit-user-drag: none;
     cursor: pointer;
 }
 
 #mouse{
-    margin-top: 22px;
-    margin-left: 15px;
+    margin-top: 29px;
+    margin-left: 23px;
     -webkit-user-drag: none;
 }
 
