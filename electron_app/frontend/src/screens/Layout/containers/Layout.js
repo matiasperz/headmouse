@@ -202,7 +202,7 @@ class Layout extends Component {
                         isSearchable={true}
                         value={this.state.delay}
                         onChange={this.handleDelayChange}
-                        placeholder={`${(this.state.delay+1).toString()} seg`}
+                        placeholder={`${(this.state.delay).toString()} seg`}
                         styles={{
                             container: (provided) => ({
                                 ...provided,
@@ -221,11 +221,11 @@ class Layout extends Component {
                         }}
                         options={
                             [
-                                { value: 0, label: '1' },
-                                { value: 1, label: '2' },
-                                { value: 2, label: '3' },
-                                { value: 3, label: '4' },
-                                { value: 4, label: '5' }
+                                { value: 0, label: '0' },
+                                { value: 1, label: '1' },
+                                { value: 2, label: '2' },
+                                { value: 3, label: '3' },
+                                { value: 4, label: '4' }
                             ]
                         }
                     />

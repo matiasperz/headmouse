@@ -1,10 +1,10 @@
 {
   "click": "AUTO_CLICK",
-  "delay": 2,
+  "delay": 0,
   "error": null,
   "info": null,
   "inverted": false,
   "openKeyboard": false,
-  "sensibility": 2,
+  "sensibility": 3,
   "shouldSendToMain": true
 }

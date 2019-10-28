@@ -30,7 +30,7 @@ createWindow = _ => {
   configWin.webContents.once('dom-ready', () => {
     configWin.webContents.send('app-init', configuration.readSettings());
     HeadMouseSerial.establishArduinoComunication();
-    HeadMouseSerial.sendInitialConfig(configuration.readSettings());
+    // HeadMouseSerial.sendInitialConfig(configuration.readSettings());
   });
 
   configWin.on('close', _ => {
@@ -66,7 +66,7 @@ createBubble = () => {
 
   bubbleWin.webContents.once('dom-ready', () => {
     HeadMouseSerial.establishArduinoComunication();
-    HeadMouseSerial.sendInitialConfig(configuration.readSettings());
+    // HeadMouseSerial.sendInitialConfig(configuration.readSettings());
   });
 
   bubbleWin.on('closed', _ => {

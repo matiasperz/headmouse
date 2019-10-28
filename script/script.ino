@@ -17,7 +17,7 @@ boolean TOGGLE_RIGHT_CLICK = true;  //<-- For canceling the RIGHT_CLICK action;
 boolean CLICK_INVERT = false;
 char MODULE[13];
 int MOUSE_SENSIBILITY = 0;
-int CLICK_DELAY = 0;
+int CLICK_DELAY = 2;
 
 
 //VARIABLES
@@ -73,12 +73,7 @@ RF24 radio(9, 10);
 
 void setup() {
   Serial.begin(9600); //<-- Serial monitor begin
-  while(!initialConfigReceived){
-    if(Serial.available()){
-      readIncomingJson();
-    }
-  }
-  initialConfigReceived = true;
+  strcpy(MODULE, "RADIO_BUTTONS");
   //NRF24L01 Alimentation 3.3v pin config
   pinMode(A0, OUTPUT); //<-- Define the pin output
   digitalWrite(A0, HIGH);  //<-- Flow voltaje through pin
@@ -358,35 +353,8 @@ void readIncomingJson(){ //<-- Interpretates the JSON string
     if (jsoneq(JSON_STRING, &jsmn_token_array[i], "type") == 0) {
       strcpy(JSON_KEY, RECEIVED_STRING.substring(jsmn_token_array[i + 1].start, jsmn_token_array[i + 1].end).c_str());
     } else if (jsoneq(JSON_STRING, &jsmn_token_array[i], "payload") == 0) {
-      Serial.println("PASE POR ACA");
-      if(strcmp(JSON_KEY, "INITIAL_CONFIG") == 0 && !initialConfigReceived){
-        int j;
-        if (jsmn_token_array[i + 1].type != JSMN_ARRAY) {
-          continue; /* We expect groups to be an array of strings */
-        }
-        
-        for (j = 0; j < jsmn_token_array[i + 1].size; j++) {
-          int r;
-          jsmntok_t *arrayObjectItem = &jsmn_token_array[i + j + 2]; //<-- Object item inside Array
-          if (arrayObjectItem -> type != JSMN_OBJECT) {
-            continue;
-          }
-
-          for (r = 0; r < (arrayObjectItem -> size + 4); r++) {
-            if (jsoneq(JSON_STRING, &jsmn_token_array[i + j + r + 2], "type") == 0) {
-              strcpy(JSON_KEY, RECEIVED_STRING.substring(jsmn_token_array[i + j + r + 2 + 1].start, jsmn_token_array[i + j + r + 2 + 1].end).c_str());
-            } else if (jsoneq(JSON_STRING, &jsmn_token_array[i + j + r + 2], "payload") == 0) {
-              strcpy(JSON_VALUE, RECEIVED_STRING.substring(jsmn_token_array[i + j + r + 2 + 1].start, jsmn_token_array[i + j + r + 2 + 1].end).c_str());
-              configOptions();
-            }
-          }
-          
-          // i += jsmn_token_array[i + j + 2].size + 1;
-        }
-      }else if(strcmp(JSON_KEY, "INITIAL_CONFIG") != 0){
-        strcpy(JSON_VALUE, RECEIVED_STRING.substring(jsmn_token_array[i + 1].start, jsmn_token_array[i + 1].end).c_str());
-        configOptions();
-      }
+      strcpy(JSON_VALUE, RECEIVED_STRING.substring(jsmn_token_array[i + 1].start, jsmn_token_array[i + 1].end).c_str());
+      configOptions();
     }
 
     i++; //<-- We add 1 because we already readed a value from a key
@@ -394,34 +362,28 @@ void readIncomingJson(){ //<-- Interpretates the JSON string
 }
 
 void configOptions(){ //<-- This has all the logic of each config
-  Serial.print(JSON_KEY);
-  Serial.print(": ");
-  Serial.println(JSON_VALUE);
-
   if(strcmp(JSON_KEY, "SENS") == 0){
-    // sendSerialPacket("MESSAGE", "Entre a sensivility");
+    sendSerialPacket("MESSAGE", "Cambie la configuracion de la sensibilidad");
     MOUSE_SENSIBILITY = atoi(JSON_VALUE);
     // Serial.println(MOUSE_SENSIBILITY);
   }else if(strcmp(JSON_KEY, "CLICK_DELAY") == 0){
-    // sendSerialPacket("MESSAGE", "Click delay");
-    Serial.print('ME LLEGO EL CLICK_DELAY COMO: ');
-    Serial.println(JSON_VALUE);
+    sendSerialPacket("MESSAGE", "Cambie la configuracion del delay del click");
     CLICK_DELAY = atoi(JSON_VALUE);
   }else if(strcmp(JSON_KEY, "MODULE") == 0){
-    // sendSerialPacket("MESSAGE", "Entre a module");
+    sendSerialPacket("MESSAGE", "Cambie la configuracion del modulo");
     strcpy(MODULE, JSON_VALUE);
   }else if(strcmp(JSON_KEY, "DISCOVER") == 0){
     // sendSerialPacket("MESSAGE", "Entre a discover");
     //discover function
   }else if(strcmp(JSON_KEY, "CLICK_INVERT") == 0){
-    // sendSerialPacket("MESSAGE", "Entre a click invert");
+    sendSerialPacket("MESSAGE", "Cambie la configuracion del click invertido");
     if(strcmp(JSON_VALUE, "true") == 0){
       CLICK_INVERT = true;
     }else if(strcmp(JSON_VALUE, "false") == 0){
       CLICK_INVERT = false;
     }
   }else if(strcmp(JSON_KEY, "OPEN_KEYBOARD") == 0){
-    // sendSerialPacket("MESSAGE", "Entre a keyboard");
+    sendSerialPacket("MESSAGE", "Cambie la configuracion del keyboard");
     if(strcmp(JSON_VALUE, "true") == 0){
       OPEN_KEYBOARD = true;
     }else if(strcmp(JSON_VALUE, "false") == 0){

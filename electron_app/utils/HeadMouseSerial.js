@@ -54,7 +54,6 @@ class HeadMouseSerial {
 
     _bindEvents(_parser){
         _parser.on('data', line => {
-            console.log(line);
             try{
                 const jsonEvent = JSON.parse(line);
                 
@@ -77,7 +76,7 @@ class HeadMouseSerial {
                     break;
                 }
             }catch(error){
-                // this.updateHandler("error", error.message);
+                this.updateHandler("error", error.message);
             }
         });
     }
