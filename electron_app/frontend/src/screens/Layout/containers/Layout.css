@@ -30,14 +30,17 @@ button.button {
   font-family: Montserrat;
   font-weight: 600;
   font-size: 20px;
-  background-color: #604979;
+  background-color: #4E4E4E;
   color: #ffffff;
   text-shadow: 0 0.04em 0.04em rgba(0, 0, 0, 0.35);
   text-align: center;
   transition: all 0.2s;
   height: 55px;
   width: 255px;
-  margin: 0;
+  margin-top: 0;
+  margin-bottom: 0;
+  margin-left: 20px;
+  margin-right: 20px;
 }
 
 button.button.bordered {

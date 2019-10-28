@@ -1,10 +1,10 @@
 {
-  "click": "RADIO_BUTTONS",
+  "click": "AUTO_CLICK",
   "delay": 2,
   "error": null,
   "info": null,
-  "inverted": true,
-  "openKeyboard": true,
+  "inverted": false,
+  "openKeyboard": false,
   "sensibility": 2,
   "shouldSendToMain": true
 }
