@@ -31,7 +31,9 @@ class HeadMouseSerial {
             this._bindEvents(parser);
             this.updateHandler("connected", null);
         } catch (error) {
-            this.updateHandler("error", error.message);
+            setTimeout(() => {
+                this.updateHandler("error", error.message);
+            }, 500);
         }
     }
 
@@ -59,15 +61,23 @@ class HeadMouseSerial {
                 
                 switch(jsonEvent.type){
                     case 'ERROR':
-                        this.updateHandler("error", jsonEvent.payload);
+                        setTimeout(() => {
+                            this.updateHandler("error", jsonEvent.payload);
+                        }, 500);
                     break;
 
                     case 'MESSAGE':
                         this.updateHandler("info", jsonEvent.payload);
                     break;
+
+                    case 'ACTION':
+                        this.updateHandler("action", jsonEvent.payload);
+                    break;
                 }
             }catch(error){
-                this.updateHandler("error", error.message);
+                setTimeout(() => {
+                    this.updateHandler("error", error.message);
+                }, 500);
             }
         });
     }

@@ -160,25 +160,26 @@ void sendSerialPacket(char *_type, char *_payload){
 
 //Mouse clicks
 void mouseLeftClick() {
+  sendSerialPacket("ACTION", "LEFT_CLICK");
   if (!Mouse.isPressed(MOUSE_LEFT)) {
     Mouse.click(MOUSE_LEFT);
   } else {
     Mouse.release(MOUSE_LEFT);
   }
-  sendSerialPacket("ACTION", "LEFT_CLICK");
 }
 
 void mouseRightClick() {
+  sendSerialPacket("ACTION", "RIGHT_CLICK");
   if (!Mouse.isPressed(MOUSE_RIGHT)) {
     Mouse.click(MOUSE_RIGHT);
   } else {
     Mouse.release(MOUSE_RIGHT);
     Mouse.click(MOUSE_RIGHT);
   }
-  sendSerialPacket("ACTION", "RIGHT_CLICK");
 }
 
 void mouseDoubleClick(){
+  sendSerialPacket("ACTION", "DOUBLE_CLICK");
   if (!Mouse.isPressed(MOUSE_LEFT)) {
     Mouse.click(MOUSE_LEFT);
     delay(20);
@@ -189,17 +190,16 @@ void mouseDoubleClick(){
     delay(20);
     Mouse.click(MOUSE_LEFT);
   }
-  sendSerialPacket("ACTION", "DOUBLE_CLICK");
 }
 
 void mouseSelectionClick() {
+  sendSerialPacket("ACTION", "SELECTION");
   if (!Mouse.isPressed(MOUSE_LEFT)) {
     Mouse.press(MOUSE_LEFT);
   } else {
     Mouse.release(MOUSE_LEFT);
     Mouse.press(MOUSE_LEFT);
   }
-  sendSerialPacket("ACTION", "SELECTION");
 }
 
 void evaluatePackageClick(){
@@ -227,7 +227,6 @@ void makeModuleAction(){
 void radioButtons(){
   if (radio.available()) {
     radio.read(&RadioPackage, sizeof(RadioPackage));
-    sendSerialPacket("MESSAGE", RadioPackage.action);
     evaluatePackageClick();
   }
 }

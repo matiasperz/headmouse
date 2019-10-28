@@ -19,6 +19,7 @@ import './Layout.css'
 class Layout extends Component {
     constructor(props) {
         super(props);
+        window.ipc.on('app-init', () => console.log('object'));
         window.ipc.on('app-close', () => window.ipc.send('config', this.state));
         this.state = {
             error: null,

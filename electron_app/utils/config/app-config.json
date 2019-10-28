@@ -1,7 +1,8 @@
 {
-  "click": "INFRA_GLASSES",
+  "click": "AUTO_CLICK",
   "delay": 0,
   "error": null,
+  "info": null,
   "inverted": false,
   "openKeyboard": false,
   "sensibility": 0

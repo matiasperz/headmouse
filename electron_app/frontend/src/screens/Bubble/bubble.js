@@ -14,3 +14,10 @@ window.ipc.on('error', (event, message) => {
 window.ipc.on('connected', () => {
     container.classList.remove('error');
 });
+
+window.ipc.on('action', (event, message) => {
+    container.classList.add('active');
+    setTimeout(() => {
+        container.classList.remove('active');
+    }, 200);
+});

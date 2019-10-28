@@ -65,9 +65,7 @@ createBubble = () => {
 
 winUpdateHandler = (win)=>{
   return (type, message) => {
-    setTimeout(() => {
-      win.webContents.send(type, message);
-    }, 500);
+    win.webContents.send(type, message);
   }
 };
 
