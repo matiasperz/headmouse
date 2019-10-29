@@ -1,15 +1,25 @@
 {
-  "name": "electron_test",
+  "name": "HeadMouse",
   "version": "1.0.0",
   "description": "First electron testing",
   "main": "index.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "postinstall": "electron-builder install-all-deps",
+    "pack": "electron-builder --dir",
+    "dist": "set DEBUG=electron-builder && electron-builder -w"
+  },
+  "build": {
+    "appId": "headmouse",
+    "win": {
+      "target": "NSIS"
+    }
   },
   "author": "moransantiago",
   "license": "ISC",
   "devDependencies": {
     "electron": "^6.0.11",
+    "electron-builder": "^21.2.0",
     "electron-packager": "^14.0.6",
     "electron-rebuild": "^1.8.6"
   },

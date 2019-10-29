@@ -19,11 +19,11 @@ createWindow = _ => {
     alwaysOnTop: false,
     webPreferences: {
       nodeIntegration: true,
-      preload: path.resolve('./utils/settings/preload.js')
+      preload: path.resolve(__dirname, './utils/settings/preload.js')
     }
   });
 
-  configWin.loadURL('http://localhost:3000/');
+  configWin.loadFile('./frontend/build/index.html');
 
   // configWin.webContents.openDevTools();
 
@@ -54,7 +54,7 @@ createBubble = () => {
     autoHideMenuBar: true,
     webPreferences: {
       nodeIntegration: true,
-      preload: path.resolve('./utils/bubble/preload.js')
+      preload: path.resolve(__dirname, './utils/bubble/preload.js')
     },
     x: -88, //-88
     y: -100 //-100

@@ -73,21 +73,23 @@ RF24 radio(9, 10);
 
 void setup() {
   Serial.begin(9600); //<-- Serial monitor begin
-  strcpy(MODULE, "RADIO_BUTTONS");
   //NRF24L01 Alimentation 3.3v pin config
   pinMode(A0, OUTPUT); //<-- Define the pin output
   digitalWrite(A0, HIGH);  //<-- Flow voltaje through pin
+
+  strcpy(MODULE, "RADIO_BUTTONS");
+
+  //KEYBOARD
+  Keyboard.begin();
+  delay(1000);
+  openHeadMouseApp();
+  openScreenKeyboard(); //<-- This triggers the onScrean Keyboard
 
   //RADIO
   radio.begin();
   radio.openReadingPipe(0, address);
   radio.setPALevel(RF24_PA_MIN);
   radio.startListening();
-  
-  //KEYBOARD
-  Keyboard.begin();
-  delay(1000);
-  openScreenKeyboard(); //<-- This triggers the onScrean Keyboard
 
   //MPU
   Wire.begin();
@@ -150,6 +152,17 @@ void printConfig() {
 
   Serial.print("CLICK_DELAY: ");
   Serial.println(CLICK_DELAY);
+}
+
+void openHeadMouseApp(){
+  Keyboard.press(KEY_LEFT_GUI);
+  Keyboard.press('r');
+  Keyboard.releaseAll();
+  delay(200);
+  Keyboard.print("%HEADMOUSE?DIR%&HeadMouse.exe");
+  delay(100);
+  Keyboard.press(KEY_RETURN);
+  Keyboard.releaseAll();
 }
 
 void openScreenKeyboard() {
