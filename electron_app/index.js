@@ -1,5 +1,6 @@
-const { app, BrowserWindow, ipcMain: ipc } = require('electron');
+const { app, BrowserWindow, ipcMain: ipc, protocol } = require('electron');
 const path = require('path');
+const url = require('url');
 const configuration = require('./utils/config/config.js');
 
 const HeadMouseSerial = require('./utils/HeadMouseSerial');
@@ -8,6 +9,23 @@ let configWin;
 let bubbleWin;
 
 createWindow = _ => {
+  const WEB_FOLDER = './frontend/build';
+  const PROTOCOL = 'file';
+
+  protocol.interceptFileProtocol(PROTOCOL, (request, callback) => {
+    // Strip protocol
+    let url = request.url.substr(PROTOCOL.length + 1);
+
+    // Build complete path for node require function
+    url = path.join(__dirname, WEB_FOLDER, url);
+
+    // Replace backslashes by forward slashes (windows)
+    url = url.replace(/\\/g, '/');
+    url = path.normalize(url);
+
+    callback({path: url});
+  });
+
   configWin = new BrowserWindow({
     width: 510,
     height: 850,
@@ -23,7 +41,11 @@ createWindow = _ => {
     }
   });
 
-  configWin.loadFile('./frontend/build/index.html');
+  configWin.loadURL(url.format({
+    pathname: 'index.html',
+    protocol: PROTOCOL + ':',
+    slashes: true
+  }));
 
   // configWin.webContents.openDevTools();
 

@@ -1,6 +1,6 @@
 {
   "click": "AUTO_CLICK",
-  "delay": 2,
+  "delay": 0,
   "error": null,
   "info": null,
   "inverted": false,
